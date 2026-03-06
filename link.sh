@@ -13,8 +13,8 @@ NOVO_LINK=$(echo $NOVO_LINK | sed 's/\/$//')
 echo "⏳ Atualizando arquivos..."
 
 # 2. Caminhos dos arquivos (Ajuste se as pastas forem diferentes)
-FILE_JS="frontend/script.js"
-FILE_ADMIN="frontend/admin.html"
+FILE_JS="encanadorpro/script.js"
+FILE_ADMIN="encanadorpro/admin.html"
 
 # 3. Expressão Regular para encontrar links .trycloudflare.com e substituir
 # O 'sed' procura o padrão antigo e troca pelo novo em todo o arquivo
