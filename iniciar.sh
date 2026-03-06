@@ -13,7 +13,8 @@ echo "🚀 INICIANDO SISTEMA ENCANADOR PRO"
 echo "------------------------------------------"
 
 # 1. Iniciar o servidor Node.js
-nohup node backend/server.js > node.log 2>&1 &
+# Procure e altere esta linha no iniciar.sh:
+nohup node ~/encanadorpro/server.js > node.log 2>&1 &
 echo "✅ Servidor Node.js em segundo plano."
 
 # 2. Iniciar o Túnel Cloudflare
