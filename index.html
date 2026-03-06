@@ -3,50 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro - Orçamento Rápido</title>
+    <title>Encanador Pro - Orçamento</title>
     <style>
-        body { font-family: 'Arial', sans-serif; margin: 0; background-color: #f0f2f5; }
-        header { background: #004a99; color: white; padding: 20px; text-align: center; }
-        .container { max-width: 500px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #333; margin-top: 0; }
+        body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; padding-top: 60px; }
+        
+        /* HEADER E MENU HAMBÚRGUER */
+        header { 
+            background: #004a99; color: white; padding: 15px; text-align: center; 
+            position: fixed; top: 0; width: 100%; z-index: 100; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .menu-icon {
+            position: absolute; left: 20px; font-size: 30px; cursor: pointer; color: white;
+        }
+
+        /* MENU LATERAL (SIDEBAR) */
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 200; top: 0; left: 0;
+            background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px;
+        }
+        .sidebar a {
+            padding: 15px 25px; text-decoration: none; font-size: 20px; color: #818181; display: block; transition: 0.3s;
+        }
+        .sidebar a:hover { color: #f1f1f1; background: #222; }
+        .sidebar .closebtn { position: absolute; top: 0; right: 25px; font-size: 36px; margin-left: 50px; color: white; cursor: pointer; }
+
+        /* FORMULÁRIO */
+        .form-container { max-width: 450px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         label { display: block; margin: 10px 0 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #25d366; color: white; border: none; padding: 15px; margin-top: 20px; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #1eb954; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn-enviar { width: 100%; background: #004a99; color: white; border: none; padding: 15px; margin-top: 20px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* BOTÃO WHATSAPP */
+        .btn-whatsapp {
+            position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
+            background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center;
+            font-size: 30px; box-shadow: 1px 1px 2px #888; z-index: 1000;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+        }
+        .btn-whatsapp:hover { background-color: #1eb954; }
+
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🔧 Encanador Pro</h1>
+        <div class="menu-icon" onclick="openNav()">&#9776;</div>
+        <h1 style="margin:0; font-size: 22px;">🔧 Encanador Pro</h1>
     </header>
 
-    <div class="container">
-        <h2>Solicitar Orçamento</h2>
-        <form id="form-orcamento">
-            <label>Seu Nome:</label>
-            <input type="text" id="nome" placeholder="Ex: Lucas Silva" required>
+    <div id="mySidebar" class="sidebar">
+        <span class="closebtn" onclick="closeNav()">&times;</span>
+        <a href="#" onclick="closeNav()">Início</a>
+        <a href="#">Histórico</a>
+        <a href="#">Galeria</a>
+        <a href="#">Trabalhe Conosco</a>
+        <a href="admin.html">Admin</a>
+    </div>
 
-            <label>Serviço Necessário:</label>
+    <div class="form-container">
+        <h2>Solicitar Orçamento</h2>
+        <form id="orcamento-form">
+            <label>Nome Completo:</label>
+            <input type="text" id="nome" required placeholder="Seu nome">
+
+            <label>Endereço do Serviço:</label>
+            <input type="text" id="endereco" required placeholder="Rua, número, bairro">
+
+            <label>Tipo de Serviço:</label>
             <select id="servico">
                 <option value="Vazamento">Vazamento</option>
                 <option value="Desentupimento">Desentupimento</option>
-                <option value="Instalação">Instalação Geral</option>
+                <option value="Instalação">Instalação</option>
                 <option value="Outros">Outros</option>
             </select>
 
-            <label>Mensagem/Endereço:</label>
-            <textarea id="mensagem" rows="4" placeholder="Descreva brevemente o problema..."></textarea>
+            <label>Descrição Opcional:</label>
+            <textarea id="mensagem" rows="3" placeholder="Detalhes do problema..."></textarea>
 
-            <button type="submit" id="btn-enviar">Enviar Pedido</button>
+            <button type="submit" id="btn-enviar" class="btn-enviar">Enviar Pedido</button>
         </form>
     </div>
 
+    <a href="https://wa.me/5573989478170" class="btn-whatsapp" target="_blank">
+        <svg viewBox="0 0 32 32" style="width:35px; fill:white;"><path d="M16 0c-8.837 0-16 7.163-16 16 0 2.825.737 5.48 2.025 7.788l-2.025 7.412 7.585-1.99c2.213 1.173 4.73 1.838 7.415 1.838 8.837 0 16-7.163 16-16s-7.163-16-16-16zm8.833 22.757c-.367 1.033-1.838 1.9-2.54 2.033-.633.12-1.458.217-2.358-.073-3.667-1.183-6.07-4.887-6.253-5.133-.183-.247-1.493-1.983-1.493-3.783 0-1.8 1.05-2.683 1.423-3.05.3-.3.667-.367.883-.367.217 0 .433.003.617.01.21.01.49-.08.767.583.283.687.967 2.35.105 2.517-.117.167-.25.267-.4.417-.15.15-.317.333-.45.433-.15.15-.31.317-.133.617.177.3.783 1.293 1.683 2.093.71.633 1.3.833 1.583.967.283.133.45.117.617-.067.167-.183.717-.833.917-1.117.2-.283.4-.233.667-.133.267.1 1.683.783 1.967.933.283.15.467.217.533.333.067.117.067.683-.3 1.717z"/></svg>
+    </a>
+
     <script>
-        // O script iniciar.sh vai trocar esse link automaticamente pelo link do Cloudflare
         const API_URL = "http://localhost:3000"; 
 
-        document.getElementById('form-orcamento').addEventListener('submit', async (e) => {
+        // FUNÇÕES DO MENU
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+
+        // ENVIO DO FORMULÁRIO
+        document.getElementById('orcamento-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-enviar');
             btn.disabled = true;
@@ -54,29 +106,23 @@
 
             const dados = {
                 nome: document.getElementById('nome').value,
+                endereco: document.getElementById('endereco').value,
                 servico: document.getElementById('servico').value,
                 mensagem: document.getElementById('mensagem').value
             };
 
             try {
-                const response = await fetch(`${API_URL}/orcamento`, {
+                const res = await fetch(`${API_URL}/orcamento`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dados)
                 });
-
-                if (response.ok) {
-                    alert("✅ Pedido enviado! Entraremos em contato.");
-                    document.getElementById('form-orcamento').reset();
-                } else {
-                    alert("❌ Erro ao enviar pedido.");
+                if (res.ok) {
+                    alert("✅ Pedido enviado!");
+                    document.getElementById('orcamento-form').reset();
                 }
-            } catch (error) {
-                alert("❌ Servidor offline. Tente mais tarde.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Enviar Pedido";
-            }
+            } catch (err) { alert("❌ Erro de conexão."); }
+            finally { btn.disabled = false; btn.innerText = "Enviar Pedido"; }
         });
     </script>
 </body>

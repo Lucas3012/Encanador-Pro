@@ -9,13 +9,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ADMIN_USER = "admin"; // Seu usuário
-const ADMIN_PASS = "1234";  // Sua senha
+const ADMIN_USER = "admin"; 
+const ADMIN_PASS = "1234";  
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
 
-// Garante existência do banco
+// Garante que a pasta e o arquivo de banco existam
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ pedidos: [] }, null, 2));
 
@@ -23,13 +23,14 @@ if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ pedidos:
 
 // 1. Receber orçamento (Público)
 app.post('/orcamento', (req, res) => {
-    const { nome, servico, mensagem } = req.body;
-    if (!nome || !servico) return res.status(400).json({ message: "Dados incompletos." });
+    const { nome, endereco, servico, mensagem } = req.body;
+    if (!nome || !servico || !endereco) return res.status(400).json({ message: "Dados incompletos." });
 
     const novoPedido = {
         id: Date.now(),
         data: new Date().toLocaleString('pt-BR'),
         nome,
+        endereco,
         servico,
         mensagem
     };
@@ -38,13 +39,13 @@ app.post('/orcamento', (req, res) => {
         const banco = JSON.parse(data);
         banco.pedidos.push(novoPedido);
         fs.writeFile(DB_PATH, JSON.stringify(banco, null, 2), () => {
-            console.log(`✅ Pedido de ${nome} salvo!`);
+            console.log(`✅ Novo pedido: ${nome} em ${endereco}`);
             res.status(200).json({ message: "Sucesso!" });
         });
     });
 });
 
-// 2. Listar pedidos (Protegido)
+// 2. Listar pedidos (Protegido por senha)
 app.get('/admin/pedidos', (req, res) => {
     const { user, pass } = req.query;
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
@@ -52,7 +53,7 @@ app.get('/admin/pedidos', (req, res) => {
             res.status(200).json(JSON.parse(data).pedidos);
         });
     } else {
-        res.status(401).json({ message: "Não autorizado" });
+        res.status(401).json({ message: "Acesso Negado" });
     }
 });
 
@@ -72,4 +73,4 @@ app.delete('/admin/pedidos/:id', (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor rodando em http://localhost:${PORT}`));
