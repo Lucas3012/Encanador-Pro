@@ -7,62 +7,67 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="navbar">
-        <a href="index.html">Início</a>
-        <a href="galeria.html">Galeria</a>
-        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="admin.html">Painel Admin</a>
-    </div>
+    <div class="navbar"><a href="index.html">Sair</a></div>
 
     <div class="container" id="login">
         <h1>🔐 Admin</h1>
         <input type="text" id="user" placeholder="Usuário">
         <input type="password" id="pass" placeholder="Senha">
-        <button onclick="fazerLogin()">Acessar</button>
+        <button onclick="logar()">Entrar</button>
     </div>
 
     <div class="container" id="painel" style="display:none;">
-        <h2>Pedidos</h2>
-        <table id="tabela-pedidos"></table>
+        <h2>🕵️ Fotos Pendentes (Moderação)</h2>
+        <div id="pendentes" class="grid"></div>
         <hr>
-        <h2>Galeria</h2>
-        <div id="galeria-admin" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+        <h2>📋 Pedidos Recentes</h2>
+        <table id="pedidos"></table>
     </div>
 
     <script>
-        const API_BASE = "https://clinton-travelling-monthly-term.trycloudflare.com";
-        async function fazerLogin() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            const res = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+        const API_BASE = "https://pitch-closing-idea-wind.trycloudflare.com";
+        async function logar() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            const res = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
             if(res.ok) {
                 document.getElementById('login').style.display = 'none';
                 document.getElementById('painel').style.display = 'block';
-                atualizar(user, pass);
+                atualizar();
             }
         }
 
-        async function atualizar(u, p) {
-            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
-            const pedidos = await resP.json();
-            document.getElementById('tabela-pedidos').innerHTML = `<tr><th>Cliente</th><th>Ação</th></tr>` + 
-                pedidos.map(pd => `<tr><td>${pd.nome}</td><td><a href="https://wa.me/5573988478170" target="_blank">Ver</a></td></tr>`).join('');
-
-            const resF = await fetch(`${API_BASE}/api/fotos`);
-            const fotos = await resF.json();
-            document.getElementById('galeria-admin').innerHTML = fotos.map(f => `
-                <div style="border:1px solid #ddd; padding:5px;">
-                    <img src="${API_BASE}/galeria/${f}" width="80"><br>
-                    <button class="btn-del" onclick="apagar('${f}')">X</button>
-                </div>
-            `).join('');
-        }
-
-        async function apagar(nome) {
+        async function atualizar() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/api/fotos/${nome}?user=${u}&pass=${p}`, {method:'DELETE'});
-            atualizar(u, p);
+
+            // Carregar Pendentes
+            const resF = await fetch(`${API_BASE}/api/admin/pendentes?user=${u}&pass=${p}`);
+            const fotos = await resF.json();
+            document.getElementById('pendentes').innerHTML = fotos.map(f => `
+                <div class="card">
+                    <img src="${API_BASE}/temp_galeria/${f}">
+                    <button onclick="decidir('${f}', 'aprovar')" style="background:green">Aprovar</button>
+                    <button onclick="decidir('${f}', 'reprovar')" style="background:red">Recusar</button>
+                </div>
+            `).join('');
+
+            // Carregar Pedidos
+            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
+            const pedidos = await resP.json();
+            document.getElementById('pedidos').innerHTML = `<tr><th>Cliente</th><th>Ação</th></tr>` + 
+                pedidos.map(pd => `<tr><td>${pd.nome}</td><td><a href="https://wa.me/5573988478170">Ver</a></td></tr>`).join('');
+        }
+
+        async function decidir(foto, acao) {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            await fetch(`${API_BASE}/api/admin/decidir`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user, pass, foto, acao })
+            });
+            atualizar();
         }
     </script>
 </body>

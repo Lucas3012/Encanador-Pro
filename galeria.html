@@ -15,22 +15,31 @@
     </div>
 
     <div class="container">
-        <h1>📸 Nossos Serviços</h1>
-        <div class="grid" id="lista-fotos"></div>
+        <h1>📸 Galeria de Serviços</h1>
+        <div class="grid" id="lista"></div>
     </div>
 
+    <label class="upload-float" for="input-foto">+</label>
+    <input type="file" id="input-foto" style="display:none" accept="image/*" onchange="enviarFoto(this)">
+
     <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
     </a>
 
     <script>
-        const API_BASE = "https://clinton-travelling-monthly-term.trycloudflare.com";
+        const API_BASE = "https://pitch-closing-idea-wind.trycloudflare.com";
         async function carregar() {
             const res = await fetch(`${API_BASE}/api/fotos`);
             const fotos = await res.json();
-            document.getElementById('lista-fotos').innerHTML = fotos.map(f => `
+            document.getElementById('lista').innerHTML = fotos.map(f => `
                 <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Serviço Realizado</p></div>
             `).join('');
+        }
+        async function enviarFoto(input) {
+            const formData = new FormData();
+            formData.append('foto', input.files[0]);
+            const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+            if(res.ok) alert("Foto enviada para moderação!");
         }
         carregar();
     </script>
