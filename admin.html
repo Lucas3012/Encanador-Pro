@@ -3,75 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .foto-item { display: inline-block; margin: 10px; text-align: center; border: 1px solid #ccc; padding: 5px; }
-        .btn-del { background: red; color: white; border: none; cursor: pointer; }
-    </style>
+    <title>Painel Admin - Encanador Pro</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>🔐 Painel Administrativo</h1>
-    <div id="login-box">
-        <input type="text" id="user" placeholder="Usuário">
-        <input type="password" id="pass" placeholder="Senha">
-        <button onclick="carregarTudo()">Entrar</button>
+    <div class="navbar">
+        <a href="index.html">Início</a>
+        <a href="galeria.html">Galeria</a>
+        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
+        <a href="admin.html">Painel Admin</a>
     </div>
 
-    <div id="conteudo" style="display:none;">
-        <h2>Pedidos Recentes</h2>
-        <table id="tabela">
-            <thead><tr><th>Data</th><th>Nome</th><th>Serviço</th><th>Ação</th></tr></thead>
-            <tbody id="pedidos"></tbody>
-        </table>
+    <div class="container" id="login-section">
+        <h1>🔐 Acesso Restrito</h1>
+        <input type="text" id="user" placeholder="Usuário">
+        <input type="password" id="pass" placeholder="Senha">
+        <button onclick="fazerLogin()">Entrar no Painel</button>
+    </div>
 
-        <h2>Gerenciar Galeria</h2>
-        <div id="galeria-admin"></div>
+    <div class="container" id="admin-content" style="display:none; max-width: 950px;">
+        <h1>📋 Gestão de Pedidos</h1>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Serviço</th>
+                        <th>Contato</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-pedidos"></tbody>
+            </table>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <h1>🖼️ Gerenciar Galeria</h1>
+        <div id="galeria-admin" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+            </div>
     </div>
 
     <script>
-        const API_BASE = "https://beijing-liquid-gives-threatening.trycloudflare.com";
+        const API_BASE = "https://albums-speaks-notes-fired.trycloudflare.com";
 
-        async function carregarTudo() {
+        async function fazerLogin() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+                if (res.ok) {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('admin-content').style.display = 'block';
+                    carregarDados();
+                } else { alert("Usuário ou senha incorretos!"); }
+            } catch (err) { alert("Erro ao conectar ao servidor."); }
+        }
+
+        async function carregarDados() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
 
             // Carregar Pedidos
             const resP = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
-            if (!resP.ok) return alert("Login Incorreto");
-            
-            document.getElementById('login-box').style.display = 'none';
-            document.getElementById('conteudo').style.display = 'block';
-
             const pedidos = await resP.json();
-            document.getElementById('pedidos').innerHTML = pedidos.reverse().map(p => `
+            document.getElementById('lista-pedidos').innerHTML = pedidos.reverse().map(p => `
                 <tr>
                     <td>${p.data}</td>
                     <td>${p.nome}</td>
                     <td>${p.servico}</td>
-                    <td><a href="https://wa.me/55?text=Olá ${p.nome}" target="_blank">WhatsApp</a></td>
+                    <td><a href="https://wa.me/55?text=Olá ${p.nome}" class="btn-whatsapp" target="_blank">WhatsApp</a></td>
                 </tr>
             `).join('');
 
-            // Carregar Fotos
+            // Carregar Galeria
             const resF = await fetch(`${API_BASE}/api/fotos`);
             const fotos = await resF.json();
             document.getElementById('galeria-admin').innerHTML = fotos.map(f => `
-                <div class="foto-item">
-                    <img src="${API_BASE}/galeria/${f}" width="100"><br>
-                    <button class="btn-del" onclick="apagarFoto('${f}')">Apagar</button>
+                <div style="text-align:center; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
+                    <img src="${API_BASE}/galeria/${f}" width="120" style="border-radius:5px;"><br>
+                    <button class="btn-delete" style="margin-top:5px; width: auto;" onclick="apagarFoto('${f}')">Excluir</button>
                 </div>
             `).join('');
         }
 
         async function apagarFoto(nome) {
-            if(!confirm("Apagar foto?")) return;
+            if(!confirm("Deseja excluir esta foto da galeria?")) return;
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/api/fotos/${nome}?user=${user}&pass=${pass}`, {method: 'DELETE'});
-            carregarTudo();
+            await fetch(`${API_BASE}/api/fotos/${nome}?user=${user}&pass=${pass}`, { method: 'DELETE' });
+            carregarDados();
         }
     </script>
 </body>

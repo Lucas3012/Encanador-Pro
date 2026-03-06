@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro - Serviços Residenciais</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
-        button { background: #0056b3; color: white; border: none; cursor: pointer; font-weight: bold; }
-        .btn-galeria { background: #28a745; text-decoration: none; display: block; text-align: center; color: white; padding: 10px; border-radius: 5px; }
-    </style>
+    <title>Encanador Pro - Início</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="navbar">
+        <a href="index.html">Início</a>
+        <a href="galeria.html">Galeria</a>
+        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
+        <a href="admin.html">Painel Admin</a>
+    </div>
+
     <div class="container">
         <h1>🛠️ Encanador Pro</h1>
-        <p>Peça seu orçamento agora!</p>
+        <p style="text-align:center">Soluções rápidas para vazamentos e instalações.</p>
+        
         <form id="formOrcamento">
             <input type="text" id="nome" placeholder="Seu Nome" required>
             <input type="text" id="endereco" placeholder="Seu Endereço" required>
-            <input type="text" id="servico" placeholder="Tipo de Serviço (Ex: Vazamento)" required>
-            <textarea id="mensagem" placeholder="Detalhes do problema"></textarea>
-            <button type="submit">Enviar Pedido</button>
+            <input type="text" id="servico" placeholder="Tipo de Serviço (Ex: Vaso entupido)" required>
+            <textarea id="mensagem" placeholder="Detalhes adicionais..." rows="4"></textarea>
+            <button type="submit">Enviar Pedido de Orçamento</button>
         </form>
-        <hr>
-        <a href="galeria.html" class="btn-galeria">📷 Ver Galeria de Serviços</a>
     </div>
 
     <script>
-        const API_BASE = "https://beijing-liquid-gives-threatening.trycloudflare.com";
+        const API_BASE = "https://albums-speaks-notes-fired.trycloudflare.com";
 
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
@@ -38,13 +38,15 @@
                 servico: document.getElementById('servico').value,
                 mensagem: document.getElementById('mensagem').value
             };
-            const res = await fetch(`${API_BASE}/orcamento`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
-            });
-            if(res.ok) { alert('Pedido enviado com sucesso!'); e.target.reset(); }
-            else { alert('Erro ao enviar.'); }
+            try {
+                const res = await fetch(`${API_BASE}/orcamento`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+                if(res.ok) { alert('Pedido enviado com sucesso!'); e.target.reset(); }
+                else { alert('Erro ao enviar pedido.'); }
+            } catch (err) { alert('Erro de conexão com o servidor.'); }
         };
     </script>
 </body>
