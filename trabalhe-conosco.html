@@ -3,26 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabalhe Conosco</title>
+    <title>Trabalhe Conosco - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="navbar">
+
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <span style="font-weight: bold; font-size: 20px;">Encanador Pro</span>
+    </div>
+
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="toggleNav()">&times;</span>
         <a href="index.html">Início</a>
         <a href="galeria.html">Galeria</a>
         <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="admin.html">Painel Admin</a>
+        <a href="historico.html">Histórico</a>
+        <a href="admin.html">Admin</a>
     </div>
 
     <div class="container">
         <h1>🤝 Faça parte da Equipe</h1>
-        <input type="text" placeholder="Seu Nome">
-        <input type="text" placeholder="Sua Especialidade">
-        <button onclick="alert('Currículo enviado!')">Enviar Dados</button>
+        <p style="text-align:center">Estamos sempre em busca de profissionais qualificados para atender nossos clientes.</p>
+        
+        <form id="formTrabalho">
+            <input type="text" id="nome-candidato" placeholder="Seu Nome Completo" required>
+            <input type="text" id="especialidade" placeholder="Sua Especialidade (Ex: Hidráulica, Esgoto)" required>
+            <input type="text" id="telefone-candidato" placeholder="WhatsApp (DDD + Número)" required>
+            <textarea id="experiencia" placeholder="Conte um pouco sobre sua experiência..." rows="4"></textarea>
+            <button type="button" onclick="enviarCandidatura()">Enviar Candidatura</button>
+        </form>
     </div>
 
-    <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/5573988478170?text=Olá! Tenho interesse em trabalhar com vocês." class="whatsapp-float" target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
     </a>
+
+    <script>
+        // Função para abrir/fechar o menu lateral
+        function toggleNav() {
+            const sidebar = document.getElementById("mySidebar");
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+            } else {
+                sidebar.style.width = "250px";
+            }
+        }
+
+        // Função de envio (Simulada ou integrada ao servidor)
+        function enviarCandidatura() {
+            const nome = document.getElementById('nome-candidato').value;
+            if(nome) {
+                alert(`Obrigado, ${nome}! Seus dados foram enviados para análise.`);
+                document.getElementById('formTrabalho').reset();
+            } else {
+                alert("Por favor, preencha pelo menos o seu nome.");
+            }
+        }
+    </script>
 </body>
 </html>
