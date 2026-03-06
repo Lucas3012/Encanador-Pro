@@ -1,82 +1,77 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Admin - Encanador Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin</title>
     <style>
-        body { font-family: sans-serif; background: #eef2f3; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        #login-area { text-align: center; padding: 40px; }
-        #painel-conteudo { display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #004a99; color: white; }
-        .btn-excluir { background: #ff4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
-        .maps-link { color: #004a99; text-decoration: none; font-weight: bold; }
+        body { font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .foto-item { display: inline-block; margin: 10px; text-align: center; border: 1px solid #ccc; padding: 5px; }
+        .btn-del { background: red; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
+    <h1>🔐 Painel Administrativo</h1>
+    <div id="login-box">
+        <input type="text" id="user" placeholder="Usuário">
+        <input type="password" id="pass" placeholder="Senha">
+        <button onclick="carregarTudo()">Entrar</button>
+    </div>
 
-    <div class="container">
-        <div id="login-area">
-            <h2>🔐 Login Administrativo</h2>
-            <input type="text" id="user" placeholder="Usuário"><br><br>
-            <input type="password" id="pass" placeholder="Senha"><br><br>
-            <button onclick="carregarPedidos()" style="padding: 10px 20px; cursor:pointer;">Entrar</button>
-        </div>
+    <div id="conteudo" style="display:none;">
+        <h2>Pedidos Recentes</h2>
+        <table id="tabela">
+            <thead><tr><th>Data</th><th>Nome</th><th>Serviço</th><th>Ação</th></tr></thead>
+            <tbody id="pedidos"></tbody>
+        </table>
 
-        <div id="painel-conteudo">
-            <h2>📋 Pedidos de Orçamento <button onclick="location.reload()" style="float:right">Sair</button></h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Cliente</th>
-                        <th>Endereço</th>
-                        <th>Serviço</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-pedidos"></tbody>
-            </table>
-        </div>
+        <h2>Gerenciar Galeria</h2>
+        <div id="galeria-admin"></div>
     </div>
 
     <script>
-        // O iniciar.sh troca este link automaticamente
-        const API_BASE = "https://gadgets-ink-unable-funk.trycloudflare.com"; 
+        const API_BASE = "https://beijing-liquid-gives-threatening.trycloudflare.com";
 
-        async function carregarPedidos() {
+        async function carregarTudo() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
 
-            try {
-                const res = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
-                if (res.status === 401) return alert("Acesso negado!");
+            // Carregar Pedidos
+            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+            if (!resP.ok) return alert("Login Incorreto");
+            
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('conteudo').style.display = 'block';
 
-                const pedidos = await res.json();
-                document.getElementById('login-area').style.display = 'none';
-                document.getElementById('painel-conteudo').style.display = 'block';
+            const pedidos = await resP.json();
+            document.getElementById('pedidos').innerHTML = pedidos.reverse().map(p => `
+                <tr>
+                    <td>${p.data}</td>
+                    <td>${p.nome}</td>
+                    <td>${p.servico}</td>
+                    <td><a href="https://wa.me/55?text=Olá ${p.nome}" target="_blank">WhatsApp</a></td>
+                </tr>
+            `).join('');
 
-                const html = pedidos.reverse().map(p => `
-                    <tr>
-                        <td>${p.data}</td>
-                        <td><b>${p.nome}</b></td>
-                        <td><a class="maps-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.endereco)}" target="_blank">📍 Ver no Mapa</a><br><small>${p.endereco}</small></td>
-                        <td>${p.servico}</td>
-                        <td><button class="btn-excluir" onclick="excluir(${p.id})">Apagar</button></td>
-                    </tr>
-                `).join('');
-                document.getElementById('tabela-pedidos').innerHTML = html;
-            } catch (err) { alert("Erro de conexão."); }
+            // Carregar Fotos
+            const resF = await fetch(`${API_BASE}/api/fotos`);
+            const fotos = await resF.json();
+            document.getElementById('galeria-admin').innerHTML = fotos.map(f => `
+                <div class="foto-item">
+                    <img src="${API_BASE}/galeria/${f}" width="100"><br>
+                    <button class="btn-del" onclick="apagarFoto('${f}')">Apagar</button>
+                </div>
+            `).join('');
         }
 
-        async function excluir(id) {
-            if (!confirm("Excluir pedido?")) return;
+        async function apagarFoto(nome) {
+            if(!confirm("Apagar foto?")) return;
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/admin/pedidos/${id}?user=${user}&pass=${pass}`, { method: 'DELETE' });
-            carregarPedidos();
+            await fetch(`${API_BASE}/api/fotos/${nome}?user=${user}&pass=${pass}`, {method: 'DELETE'});
+            carregarTudo();
         }
     </script>
 </body>

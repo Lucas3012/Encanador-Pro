@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria - Encanador Pro</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #eee; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 10px; border-radius: 10px; }
+        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+        .btn { display: inline-block; margin-top: 20px; padding: 10px; background: #0056b3; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Nossos Trabalhos</h1>
+    <div class="grid" id="lista"></div>
+    <a href="index.html" class="btn">Voltar</a>
+
+    <script>
+        const API_BASE = "https://beijing-liquid-gives-threatening.trycloudflare.com";
+        async function carregar() {
+            const res = await fetch(`${API_BASE}/api/fotos`);
+            const fotos = await res.json();
+            document.getElementById('lista').innerHTML = fotos.map(f => `
+                <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Serviço Realizado</p></div>
+            `).join('');
+        }
+        carregar();
+    </script>
+</body>
+</html>
