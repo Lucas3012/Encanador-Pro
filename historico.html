@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - Encanador Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <span style="font-weight: bold; font-size: 20px;">Histórico de Serviços</span>
+    </div>
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="toggleNav()">&times;</span>
+        <a href="index.html">Início</a>
+        <a href="galeria.html">Galeria</a>
+        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
+        <a href="historico.html">Histórico</a>
+        <a href="admin.html">Admin</a>
+    </div>
+
+    <div class="container">
+        <h1>📜 Últimos Atendimentos</h1>
+        <div id="lista-historico">Carregando serviços...</div>
+    </div>
+
+    <script>
+        function toggleNav() {
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+
+        async function carregarHistorico() {
+            // Aqui você pode buscar fotos da galeria ou uma rota específica
+            const res = await fetch(`http://localhost:3000/api/fotos`);
+            const fotos = await res.json();
+            document.getElementById('lista-historico').innerHTML = fotos.map(f => `
+                <div style="border-bottom: 1px solid #ddd; padding: 10px;">
+                    ✅ Serviço concluído com sucesso em ${new Date().toLocaleDateString()}
+                </div>
+            `).join('');
+        }
+        carregarHistorico();
+    </script>
+</body>
+</html>

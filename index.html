@@ -7,45 +7,45 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="navbar">
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <span>Encanador Pro</span>
+    </div>
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="toggleNav()">&times;</span>
         <a href="index.html">Início</a>
         <a href="galeria.html">Galeria</a>
         <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="admin.html">Painel Admin</a>
+        <a href="historico.html">Histórico</a>
+        <a href="admin.html">Admin</a>
     </div>
 
     <div class="container">
-        <h1>🛠️ Encanador Pro</h1>
-        <p style="text-align:center">Atendimento rápido em toda região!</p>
+        <h1>🛠️ Orçamento Rápido</h1>
         <form id="formOrcamento">
             <input type="text" id="nome" placeholder="Seu Nome" required>
-            <input type="text" id="endereco" placeholder="Seu Endereço" required>
-            <input type="text" id="servico" placeholder="O que você precisa?" required>
-            <textarea id="mensagem" placeholder="Detalhes do problema..."></textarea>
-            <button type="submit">Pedir Orçamento</button>
+            <input type="text" id="endereco" placeholder="Endereço" required>
+            <input type="text" id="servico" placeholder="O que precisa?" required>
+            <textarea id="mensagem" placeholder="Detalhes..."></textarea>
+            <button type="submit">Enviar Agora</button>
         </form>
     </div>
 
-    <a href="https://wa.me/5573988478170?text=Olá! Vim pelo site e gostaria de um orçamento." class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
     </a>
 
     <script>
-        const API_BASE = "https://relates-glow-roommate-put.trycloudflare.com";
+        const API_BASE = "https://saint-manufacturing-irc-tested.trycloudflare.com";
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = {
-                nome: document.getElementById('nome').value,
-                endereco: document.getElementById('endereco').value,
-                servico: document.getElementById('servico').value,
-                mensagem: document.getElementById('mensagem').value
-            };
-            const res = await fetch(`${API_BASE}/orcamento`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
-            });
-            if(res.ok) { alert('Recebemos seu pedido!'); e.target.reset(); }
+            const dados = { nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, servico: document.getElementById('servico').value, mensagem: document.getElementById('mensagem').value };
+            const res = await fetch(`${API_BASE}/orcamento`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
+            if(res.ok) alert('Pedido enviado!');
         };
     </script>
 </body>

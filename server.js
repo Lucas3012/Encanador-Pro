@@ -13,17 +13,20 @@ app.use('/temp_galeria', express.static(path.join(__dirname, 'temp_galeria')));
 
 const ADMIN_USER = "admin"; 
 const ADMIN_PASS = "1234";  
-const DB_PATH = path.join(__dirname, 'data', 'db.json');
+const DATA_DIR = path.join(__dirname, 'data');
+const DB_PATH = path.join(DATA_DIR, 'db.json');
 
-// Configuração de Upload
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ pedidos: [] }));
+
 const upload = multer({ dest: path.join(__dirname, 'temp_galeria/') });
 
-// ROTA: Cliente envia foto para moderação
+// ROTA: Cliente envia foto
 app.post('/api/upload', upload.single('foto'), (req, res) => {
-    res.json({ message: "Foto enviada para moderação!" });
+    res.json({ message: "Foto em moderação!" });
 });
 
-// ROTA: Listar fotos aprovadas
+// ROTA: Listar fotos oficiais
 app.get('/api/fotos', (req, res) => {
     const pasta = path.join(__dirname, 'galeria');
     fs.readdir(pasta, (err, files) => {
@@ -32,7 +35,18 @@ app.get('/api/fotos', (req, res) => {
     });
 });
 
-// ROTA: Admin lista fotos pendentes
+// ROTA: Admin decide (Aprovar/Reprovar)
+app.post('/api/admin/decidir', (req, res) => {
+    const { user, pass, foto, acao } = req.body;
+    if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).send("Negado");
+    const camTemp = path.join(__dirname, 'temp_galeria', foto);
+    if (acao === 'aprovar') {
+        fs.renameSync(camTemp, path.join(__dirname, 'galeria', `aprovada_${Date.now()}.jpg`));
+    } else { if (fs.existsSync(camTemp)) fs.unlinkSync(camTemp); }
+    res.json({ message: "OK" });
+});
+
+// ROTA: Admin ver pendentes
 app.get('/api/admin/pendentes', (req, res) => {
     const { user, pass } = req.query;
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
@@ -40,26 +54,11 @@ app.get('/api/admin/pendentes', (req, res) => {
     } else { res.status(401).send("Negado"); }
 });
 
-// ROTA: Admin Aprova/Reprova
-app.post('/api/admin/decidir', (req, res) => {
-    const { user, pass, foto, acao } = req.body;
-    if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).send("Negado");
-
-    const caminhoTemp = path.join(__dirname, 'temp_galeria', foto);
-    if (acao === 'aprovar') {
-        const novoNome = `servico_${Date.now()}.jpg`;
-        fs.renameSync(caminhoTemp, path.join(__dirname, 'galeria', novoNome));
-    } else {
-        if (fs.existsSync(caminhoTemp)) fs.unlinkSync(caminhoTemp);
-    }
-    res.json({ message: "OK" });
-});
-
 // ROTA: Pedidos
 app.post('/orcamento', (req, res) => {
-    const banco = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    banco.pedidos.push({ id: Date.now(), data: new Date().toLocaleString('pt-BR'), ...req.body });
-    fs.writeFileSync(DB_PATH, JSON.stringify(banco, null, 2));
+    const data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    data.pedidos.push({ id: Date.now(), data: new Date().toLocaleString('pt-BR'), ...req.body });
+    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
     res.json({ message: "OK" });
 });
 
@@ -70,4 +69,4 @@ app.get('/admin/pedidos', (req, res) => {
     } else { res.status(401).send("Negado"); }
 });
 
-app.listen(3000, () => console.log('🚀 Servidor Online'));
+app.listen(3000, () => console.log('🚀 Servidor Online na 3000'));

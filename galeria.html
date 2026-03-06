@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria - Encanador Pro</title>
+    <title>Galeria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="navbar">
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <span>Nossa Galeria</span>
+    </div>
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="toggleNav()">&times;</span>
         <a href="index.html">Início</a>
         <a href="galeria.html">Galeria</a>
         <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="admin.html">Painel Admin</a>
+        <a href="historico.html">Histórico</a>
+        <a href="admin.html">Admin</a>
     </div>
 
     <div class="container">
-        <h1>📸 Galeria de Serviços</h1>
+        <h1>📸 Serviços Realizados</h1>
         <div class="grid" id="lista"></div>
     </div>
 
@@ -27,19 +33,23 @@
     </a>
 
     <script>
-        const API_BASE = "https://relates-glow-roommate-put.trycloudflare.com";
+        const API_BASE = "https://saint-manufacturing-irc-tested.trycloudflare.com";
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
         async function carregar() {
             const res = await fetch(`${API_BASE}/api/fotos`);
             const fotos = await res.json();
             document.getElementById('lista').innerHTML = fotos.map(f => `
-                <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Serviço Realizado</p></div>
+                <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Concluído</p></div>
             `).join('');
         }
         async function enviarFoto(input) {
             const formData = new FormData();
             formData.append('foto', input.files[0]);
-            const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
-            if(res.ok) alert("Foto enviada para moderação!");
+            await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+            alert("Enviada para aprovação!");
         }
         carregar();
     </script>
