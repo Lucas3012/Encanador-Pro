@@ -8,6 +8,7 @@ const app = express();
 // --- CONFIGURAÇÕES ---
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../'))); 
 
 const ADMIN_USER = "admin"; 
 const ADMIN_PASS = "1234";  
