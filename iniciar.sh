@@ -58,5 +58,6 @@ else
     echo "❌ ERRO: O link não foi gerado. Verifique o arquivo cloudflare.log"
 fi
 
-# Devolve o controle para você usar o terminal
-/data/data/com.termux/files/usr/bin/bash
+echo "📢 Servidor em segundo plano. Terminal livre para uso!"
+# REMOVA a linha que chama o /bin/bash aqui no final.
+
