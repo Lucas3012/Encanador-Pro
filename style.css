@@ -1,0 +1,222 @@
+/* Configurações Gerais */
+:root {
+    --primary: #004a99;
+    --secondary: #ff8c00;
+    --dark: #1a1a1a;
+    --light: #f4f7f6;
+    --success: #25d366;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    line-height: 1.6;
+    background-color: var(--light);
+    color: var(--dark);
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header & Nav */
+header {
+    background: var(--primary);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: var(--secondary);
+}
+
+.btn-topo {
+    background: var(--secondary);
+    color: white;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(rgba(0, 74, 153, 0.8), rgba(0, 0, 0, 0.7)), 
+                url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1200&q=80');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.hero h1 { font-size: 2.5rem; margin-bottom: 20px; }
+.hero p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; }
+
+.btn-cta {
+    background: var(--secondary);
+    color: white;
+    padding: 15px 35px;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-cta:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,140,0,0.4); }
+
+/* Galeria Antes e Depois */
+.galeria { padding: 80px 20px; }
+.galeria h2 { text-align: center; margin-bottom: 40px; color: var(--primary); }
+
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.card-trabalho {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.fotos-comparativo {
+    display: flex;
+    height: 200px;
+}
+
+.foto-item {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.foto-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    z-index: 2;
+}
+
+.antes { background: #e74c3c; }
+.depois { background: var(--success); }
+
+.card-info { padding: 20px; }
+.card-info h3 { margin-bottom: 10px; color: var(--primary); }
+.card-info p { color: #666; font-size: 0.95rem; }
+
+/* Seção Contato */
+.contato-secao {
+    padding: 60px 0;
+    background: #e9f0f7;
+}
+
+.contato-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.contato-card h2 { text-align: center; color: var(--primary); margin-bottom: 10px; }
+.contato-card p { text-align: center; margin-bottom: 30px; color: #777; }
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+form button {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+form button:hover { background: #003366; }
+
+/* Rodapé */
+footer {
+    text-align: center;
+    padding: 30px;
+    background: var(--dark);
+    color: white;
+    font-size: 0.9rem;
+}
+
+/* WhatsApp Flutuante */
+.whatsapp-float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 30px;
+    right: 30px;
+    background-color: var(--success);
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 2px 2px 15px rgba(0,0,0,0.3);
+    z-index: 1001;
+    transition: 0.3s;
+}
+
+.whatsapp-float:hover { transform: scale(1.1); }
+.whatsapp-float img { width: 35px; }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .fotos-comparativo { height: 150px; }
+}

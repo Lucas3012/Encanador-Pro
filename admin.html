@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin - Encanador Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #004a99; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background: #004a99; color: white; }
+        .btn-excluir { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+        .btn-excluir:hover { background: #cc0000; }
+        tr:hover { background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciar Pedidos - Encanador Pro</h1>
+        <table id="tabela-pedidos">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Serviço</th>
+                    <th>Mensagem</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/admin/pedidos';
+
+        async function carregarPedidos() {
+            try {
+                const response = await fetch(API_URL);
+                const pedidos = await response.json();
+                const tabela = document.getElementById('corpo-tabela');
+                
+                tabela.innerHTML = pedidos.map(p => `
+                    <tr>
+                        <td>${p.data}</td>
+                        <td>${p.nome}</td>
+                        <td><strong>${p.servico}</strong></td>
+                        <td>${p.mensagem || '-'}</td>
+                        <td>
+                            <button class="btn-excluir" onclick="excluirPedido(${p.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (erro) {
+                alert("Erro ao carregar pedidos.");
+            }
+        }
+
+        async function excluirPedido(id) {
+            if (!confirm("Tem certeza que deseja excluir este pedido?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                const resultado = await response.json();
+                
+                alert(resultado.message);
+                carregarPedidos(); // Recarrega a lista após excluir
+            } catch (erro) {
+                alert("Erro ao excluir o pedido.");
+            }
+        }
+
+        // Carrega ao abrir a página
+        carregarPedidos();
+    </script>
+</body>
+</html>
