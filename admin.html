@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Encanador Pro</title>
+    <title>Painel Admin</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,86 +14,55 @@
         <a href="admin.html">Painel Admin</a>
     </div>
 
-    <div class="container" id="login-section">
-        <h1>🔐 Acesso Restrito</h1>
+    <div class="container" id="login">
+        <h1>🔐 Admin</h1>
         <input type="text" id="user" placeholder="Usuário">
         <input type="password" id="pass" placeholder="Senha">
-        <button onclick="fazerLogin()">Entrar no Painel</button>
+        <button onclick="fazerLogin()">Acessar</button>
     </div>
 
-    <div class="container" id="admin-content" style="display:none; max-width: 950px;">
-        <h1>📋 Gestão de Pedidos</h1>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Cliente</th>
-                        <th>Serviço</th>
-                        <th>Contato</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-pedidos"></tbody>
-            </table>
-        </div>
-
-        <hr style="margin: 40px 0;">
-
-        <h1>🖼️ Gerenciar Galeria</h1>
-        <div id="galeria-admin" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
-            </div>
+    <div class="container" id="painel" style="display:none;">
+        <h2>Pedidos</h2>
+        <table id="tabela-pedidos"></table>
+        <hr>
+        <h2>Galeria</h2>
+        <div id="galeria-admin" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
     </div>
 
     <script>
-        const API_BASE = "https://albums-speaks-notes-fired.trycloudflare.com";
-
+        const API_BASE = "https://clinton-travelling-monthly-term.trycloudflare.com";
         async function fazerLogin() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-
-            try {
-                const res = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
-                if (res.ok) {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-content').style.display = 'block';
-                    carregarDados();
-                } else { alert("Usuário ou senha incorretos!"); }
-            } catch (err) { alert("Erro ao conectar ao servidor."); }
+            const res = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+            if(res.ok) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('painel').style.display = 'block';
+                atualizar(user, pass);
+            }
         }
 
-        async function carregarDados() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-
-            // Carregar Pedidos
-            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+        async function atualizar(u, p) {
+            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
             const pedidos = await resP.json();
-            document.getElementById('lista-pedidos').innerHTML = pedidos.reverse().map(p => `
-                <tr>
-                    <td>${p.data}</td>
-                    <td>${p.nome}</td>
-                    <td>${p.servico}</td>
-                    <td><a href="https://wa.me/55?text=Olá ${p.nome}" class="btn-whatsapp" target="_blank">WhatsApp</a></td>
-                </tr>
-            `).join('');
+            document.getElementById('tabela-pedidos').innerHTML = `<tr><th>Cliente</th><th>Ação</th></tr>` + 
+                pedidos.map(pd => `<tr><td>${pd.nome}</td><td><a href="https://wa.me/5573988478170" target="_blank">Ver</a></td></tr>`).join('');
 
-            // Carregar Galeria
             const resF = await fetch(`${API_BASE}/api/fotos`);
             const fotos = await resF.json();
             document.getElementById('galeria-admin').innerHTML = fotos.map(f => `
-                <div style="text-align:center; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
-                    <img src="${API_BASE}/galeria/${f}" width="120" style="border-radius:5px;"><br>
-                    <button class="btn-delete" style="margin-top:5px; width: auto;" onclick="apagarFoto('${f}')">Excluir</button>
+                <div style="border:1px solid #ddd; padding:5px;">
+                    <img src="${API_BASE}/galeria/${f}" width="80"><br>
+                    <button class="btn-del" onclick="apagar('${f}')">X</button>
                 </div>
             `).join('');
         }
 
-        async function apagarFoto(nome) {
-            if(!confirm("Deseja excluir esta foto da galeria?")) return;
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/api/fotos/${nome}?user=${user}&pass=${pass}`, { method: 'DELETE' });
-            carregarDados();
+        async function apagar(nome) {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            await fetch(`${API_BASE}/api/fotos/${nome}?user=${u}&pass=${p}`, {method:'DELETE'});
+            atualizar(u, p);
         }
     </script>
 </body>

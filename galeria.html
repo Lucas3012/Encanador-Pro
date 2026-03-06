@@ -14,33 +14,25 @@
         <a href="admin.html">Painel Admin</a>
     </div>
 
-    <div class="container" style="max-width: 1000px;">
-        <h1>📸 Nossa Galeria</h1>
-        <p style="text-align:center">Confira fotos reais dos nossos últimos atendimentos.</p>
-        <div class="grid" id="lista-fotos">
-            </div>
+    <div class="container">
+        <h1>📸 Nossos Serviços</h1>
+        <div class="grid" id="lista-fotos"></div>
     </div>
 
+    <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+
     <script>
-        const API_BASE = "https://albums-speaks-notes-fired.trycloudflare.com";
-        async function carregarGaleria() {
-            const container = document.getElementById('lista-fotos');
-            try {
-                const res = await fetch(`${API_BASE}/api/fotos`);
-                const fotos = await res.json();
-                if(fotos.length === 0) {
-                    container.innerHTML = "<p style='grid-column: 1/-1'>Nenhuma foto disponível no momento.</p>";
-                    return;
-                }
-                container.innerHTML = fotos.map(f => `
-                    <div class="card">
-                        <img src="${API_BASE}/galeria/${f}" onclick="window.open(this.src)">
-                        <p>Serviço Realizado</p>
-                    </div>
-                `).join('');
-            } catch (err) { container.innerHTML = "<p>Erro ao carregar fotos.</p>"; }
+        const API_BASE = "https://clinton-travelling-monthly-term.trycloudflare.com";
+        async function carregar() {
+            const res = await fetch(`${API_BASE}/api/fotos`);
+            const fotos = await res.json();
+            document.getElementById('lista-fotos').innerHTML = fotos.map(f => `
+                <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Serviço Realizado</p></div>
+            `).join('');
         }
-        carregarGaleria();
+        carregar();
     </script>
 </body>
 </html>
