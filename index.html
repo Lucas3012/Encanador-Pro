@@ -3,49 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro</title>
+    <title>Encanador Pro - Início</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span>Encanador Pro</span>
+        <span style="font-weight: bold; font-size: 20px;">Encanador Pro</span>
     </div>
+
     <div id="mySidebar" class="sidebar">
         <span class="close-btn" onclick="toggleNav()">&times;</span>
         <a href="index.html">Início</a>
         <a href="galeria.html">Galeria</a>
         <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
         <a href="historico.html">Histórico</a>
-        <a href="admin.html">Admin</a>
+        <a href="admin.html">Painel Admin</a>
     </div>
 
     <div class="container">
-        <h1>🛠️ Orçamento Rápido</h1>
+        <h1>🛠️ Encanador Pro</h1>
+        <p style="text-align:center; color: #666;">Serviços hidráulicos de qualidade na sua região.</p>
+
+        <div class="servicos-destaque">
+            <div class="circulo-servico" onclick="selecionarServico('Vazamento')">
+                <div class="icone-bola">💧</div>
+                <span>Vazamento</span>
+            </div>
+            <div class="circulo-servico" onclick="selecionarServico('Reparo')">
+                <div class="icone-bola">🛠️</div>
+                <span>Reparo</span>
+            </div>
+            <div class="circulo-servico" onclick="selecionarServico('Desentupimento')">
+                <div class="icone-bola">🚽</div>
+                <span>Desentupimento</span>
+            </div>
+        </div>
+
         <form id="formOrcamento">
+            <h2 style="font-size: 1.2rem;">Peça seu Orçamento</h2>
             <input type="text" id="nome" placeholder="Seu Nome" required>
-            <input type="text" id="endereco" placeholder="Endereço" required>
-            <input type="text" id="servico" placeholder="O que precisa?" required>
-            <textarea id="mensagem" placeholder="Detalhes..."></textarea>
-            <button type="submit">Enviar Agora</button>
+            <input type="text" id="endereco" placeholder="Endereço (Bairro/Rua)" required>
+            <input type="text" id="servico" placeholder="Qual o problema?" required>
+            <textarea id="mensagem" placeholder="Detalhes adicionais (opcional)" rows="3"></textarea>
+            <button type="submit">Enviar Solicitação</button>
         </form>
     </div>
 
-    <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
+    <a href="https://wa.me/5573988478170?text=Olá! Gostaria de um orçamento." class="whatsapp-float" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
     </a>
 
     <script>
-        const API_BASE = "https://herein-analyze-donors-brake.trycloudflare.com";
+        const API_BASE = "https://reading-election-politicians-depot.trycloudflare.com";
+
+        // Função para abrir/fechar o menu
         function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
         }
+
+        // Função para preencher o campo de serviço ao clicar no ícone
+        function selecionarServico(nome) {
+            document.getElementById('servico').value = nome;
+            document.getElementById('servico').focus();
+        }
+
+        // Envio do formulário
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = { nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, servico: document.getElementById('servico').value, mensagem: document.getElementById('mensagem').value };
-            const res = await fetch(`${API_BASE}/orcamento`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
-            if(res.ok) alert('Pedido enviado!');
+            const dados = {
+                nome: document.getElementById('nome').value,
+                endereco: document.getElementById('endereco').value,
+                servico: document.getElementById('servico').value,
+                mensagem: document.getElementById('mensagem').value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/orcamento`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+                if(res.ok) {
+                    alert('Pedido enviado! Entraremos em contato em breve.');
+                    e.target.reset();
+                } else {
+                    alert('Erro ao enviar. Tente novamente.');
+                }
+            } catch (err) {
+                alert('Servidor offline. Tente mais tarde.');
+            }
         };
     </script>
 </body>
