@@ -3,97 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro - Soluções Rápidas e Profissionais</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Encanador Pro - Orçamento Rápido</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; background-color: #f0f2f5; }
+        header { background: #004a99; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-top: 0; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; background: #25d366; color: white; border: none; padding: 15px; margin-top: 20px; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1eb954; }
+    </style>
 </head>
 <body>
 
     <header>
-        <nav class="container">
-            <div class="logo">Encanador <span>Pro</span></div>
-            <a href="https://wa.me/5573988478170" class="btn-topo">Emergência 24h</a>
-        </nav>
+        <h1>🔧 Encanador Pro</h1>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Problemas com vazamentos ou entupimentos?</h1>
-            <p>Atendimento especializado em Porto Seguro e região com garantia de qualidade.</p>
-            <a href="#orcamento" class="btn-cta">Solicitar Orçamento Grátis</a>
-        </div>
-    </section>
+    <div class="container">
+        <h2>Solicitar Orçamento</h2>
+        <form id="form-orcamento">
+            <label>Seu Nome:</label>
+            <input type="text" id="nome" placeholder="Ex: Lucas Silva" required>
 
-    <section class="galeria container">
-        <h2>Nossos Trabalhos (Antes & Depois)</h2>
-        <div class="galeria-grid">
-            
-            <div class="card-trabalho">
-                <div class="fotos-comparativo">
-                    <div class="foto-item">
-                        <span class="tag antes">Antes</span>
-                        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=400&q=80" alt="Vazamento">
-                    </div>
-                    <div class="foto-item">
-                        <span class="tag depois">Depois</span>
-                        <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80" alt="Reparo Concluído">
-                    </div>
-                </div>
-                <div class="card-info">
-                    <h3>Reparo de Tubulação</h3>
-                    <p>Localização de vazamento invisível e troca de cano mestre.</p>
-                </div>
-            </div>
+            <label>Serviço Necessário:</label>
+            <select id="servico">
+                <option value="Vazamento">Vazamento</option>
+                <option value="Desentupimento">Desentupimento</option>
+                <option value="Instalação">Instalação Geral</option>
+                <option value="Outros">Outros</option>
+            </select>
 
-            <div class="card-trabalho">
-                <div class="fotos-comparativo">
-                    <div class="foto-item">
-                        <span class="tag antes">Antes</span>
-                        <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=400&q=80" alt="Sifão Antigo">
-                    </div>
-                    <div class="foto-item">
-                        <span class="tag depois">Depois</span>
-                        <img src="https://images.unsplash.com/photo-1585938389612-a552a28d6914?auto=format&fit=crop&w=400&q=80" alt="Sifão Novo">
-                    </div>
-                </div>
-                <div class="card-info">
-                    <h3>Instalação de Metais</h3>
-                    <p>Substituição de sifões e torneiras com vedação profissional.</p>
-                </div>
-            </div>
+            <label>Mensagem/Endereço:</label>
+            <textarea id="mensagem" rows="4" placeholder="Descreva brevemente o problema..."></textarea>
 
-        </div>
-    </section>
+            <button type="submit" id="btn-enviar">Enviar Pedido</button>
+        </form>
+    </div>
 
-    <section id="orcamento" class="contato-secao">
-        <div class="container">
-            <div class="contato-card">
-                <h2>Peça seu Orçamento</h2>
-                <p>Retornamos em até 15 minutos via WhatsApp!</p>
-                <form id="formOrcamento">
-                    <input type="text" id="nome" placeholder="Seu Nome Completo" required>
-                    <select id="servico" required>
-                        <option value="" disabled selected>Tipo de Serviço</option>
-                        <option value="Vazamento">Vazamento / Infiltração</option>
-                        <option value="Desentupimento">Desentupimento</option>
-                        <option value="Instalação">Instalação Geral</option>
-                        <option value="Manutenção">Manutenção Preventiva</option>
-                    </select>
-                    <textarea id="mensagem" placeholder="Descreva brevemente o problema..." rows="4"></textarea>
-                    <button type="submit">Enviar para o Especialista</button>
-                </form>
-            </div>
-        </div>
-    </section>
+    <script>
+        // O script iniciar.sh vai trocar esse link automaticamente pelo link do Cloudflare
+        const API_URL = "http://localhost:3000"; 
 
-    <footer>
-        <p>&copy; 2024 Encanador Pro - Todos os direitos reservados.</p>
-    </footer>
+        document.getElementById('form-orcamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-enviar');
+            btn.disabled = true;
+            btn.innerText = "Enviando...";
 
-    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20seu%20site%20e%20preciso%20de%20um%20encanador." 
-       class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-    </a>
+            const dados = {
+                nome: document.getElementById('nome').value,
+                servico: document.getElementById('servico').value,
+                mensagem: document.getElementById('mensagem').value
+            };
 
-    <script src="script.js"></script>
+            try {
+                const response = await fetch(`${API_URL}/orcamento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                if (response.ok) {
+                    alert("✅ Pedido enviado! Entraremos em contato.");
+                    document.getElementById('form-orcamento').reset();
+                } else {
+                    alert("❌ Erro ao enviar pedido.");
+                }
+            } catch (error) {
+                alert("❌ Servidor offline. Tente mais tarde.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Enviar Pedido";
+            }
+        });
+    </script>
 </body>
 </html>

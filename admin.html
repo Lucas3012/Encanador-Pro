@@ -2,77 +2,126 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Encanador Pro</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; padding: 40px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #004a99; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Estilos do Login */
+        #login-area { text-align: center; padding: 50px 20px; }
+        .login-box { max-width: 300px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 5px; }
+        .btn-login { background: #004a99; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        
+        /* Estilos do Painel */
+        #painel-conteudo { display: none; }
+        h1 { color: #004a99; border-bottom: 3px solid #ff8c00; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #ddd; }
         th { background: #004a99; color: white; }
-        .btn-excluir { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+        tr:hover { background-color: #f9f9f9; }
+        
+        .btn-excluir { background: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
         .btn-excluir:hover { background: #cc0000; }
-        tr:hover { background: #f9f9f9; }
+        .btn-sair { background: #666; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Gerenciar Pedidos - Encanador Pro</h1>
-        <table id="tabela-pedidos">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Serviço</th>
-                    <th>Mensagem</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody id="corpo-tabela"></tbody>
-        </table>
+        <div id="login-area">
+            <h1>🔐 Acesso Restrito</h1>
+            <div class="login-box">
+                <input type="text" id="user" placeholder="Usuário">
+                <input type="password" id="pass" placeholder="Senha">
+                <button class="btn-login" onclick="carregarPedidos()">Entrar no Painel</button>
+            </div>
+        </div>
+
+        <div id="painel-conteudo">
+            <h1>
+                Pedidos Recebidos 
+                <button class="btn-sair" onclick="location.reload()">Sair</button>
+            </h1>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Serviço</th>
+                        <th>Mensagem</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/admin/pedidos';
+        // O iniciar.sh trocará automaticamente o link abaixo pelo link do Cloudflare
+        const API_BASE = "http://localhost:3000"; 
 
         async function carregarPedidos() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+
             try {
-                const response = await fetch(API_URL);
+                // Enviamos as credenciais via Query Params como definido no server.js
+                const response = await fetch(`${API_BASE}/admin/pedidos?user=${user}&pass=${pass}`);
+
+                if (response.status === 401) {
+                    alert("⚠️ Usuário ou senha incorretos!");
+                    return;
+                }
+
                 const pedidos = await response.json();
+
+                // Esconde login e mostra o painel
+                document.getElementById('login-area').style.display = 'none';
+                document.getElementById('painel-conteudo').style.display = 'block';
+
                 const tabela = document.getElementById('corpo-tabela');
-                
                 tabela.innerHTML = pedidos.map(p => `
                     <tr>
                         <td>${p.data}</td>
-                        <td>${p.nome}</td>
-                        <td><strong>${p.servico}</strong></td>
+                        <td><strong>${p.nome}</strong></td>
+                        <td>${p.servico}</td>
                         <td>${p.mensagem || '-'}</td>
                         <td>
                             <button class="btn-excluir" onclick="excluirPedido(${p.id})">Excluir</button>
                         </td>
                     </tr>
-                `).join('');
-            } catch (erro) {
-                alert("Erro ao carregar pedidos.");
+                `).reverse().join(''); // .reverse() para mostrar os mais novos primeiro
+
+            } catch (error) {
+                alert("❌ Erro ao conectar com o servidor.");
             }
         }
 
         async function excluirPedido(id) {
-            if (!confirm("Tem certeza que deseja excluir este pedido?")) return;
+            if (!confirm("Tem certeza que deseja apagar este registro?")) return;
+
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                const resultado = await response.json();
-                
-                alert(resultado.message);
-                carregarPedidos(); // Recarrega a lista após excluir
-            } catch (erro) {
-                alert("Erro ao excluir o pedido.");
+                const response = await fetch(`${API_BASE}/admin/pedidos/${id}?user=${user}&pass=${pass}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    carregarPedidos(); // Recarrega a lista
+                } else {
+                    alert("Erro ao excluir.");
+                }
+            } catch (error) {
+                alert("Erro de conexão.");
             }
         }
-
-        // Carrega ao abrir a página
-        carregarPedidos();
     </script>
 </body>
 </html>
