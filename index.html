@@ -8,12 +8,53 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Estilos específicos para esta disposição */
+        .secao-titulo { font-size: 14px; margin: 20px 0 10px; color: #555; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        
+        #lista-tecnicos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-tecnico {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid #007bff;
+        }
+
+        .tecnico-info { display: flex; align-items: center; gap: 15px; }
+        .tecnico-texto b { display: block; font-size: 15px; color: #333; }
+        .tecnico-texto span { font-size: 13px; color: #666; }
+        
+        .btn-whats-tecnico { 
+            color: #25d366; 
+            font-size: 28px; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+        }
+
+        #map { 
+            height: 200px; 
+            border-radius: 15px; 
+            border: 2px solid #ddd;
+            margin-bottom: 30px;
+        }
+    </style>
 </head>
 <body>
 
     <div class="status-bar">
-        <span>📍 Cobertura: Itabuna-BA</span>
-        <span id="sys-status"><span class="dot offline"></span> Verificando Servidor...</span>
+        <span>📍 Itabuna-BA</span>
+        <span id="sys-status"><span class="dot offline"></span> Verificando...</span>
     </div>
 
     <div class="header">
@@ -30,132 +71,107 @@
     </div>
 
     <div class="container">
-        <h2 style="text-align:center">🛠️ Nossos Serviços</h2>
-        
         <div class="servicos-destaque">
-            <div class="circulo-servico" onclick="abrirPix('Vazamento')">
-                <div class="icone-bola">💧</div>
-                <span>Vazamento</span>
-            </div>
-            <div class="circulo-servico" onclick="abrirPix('Reparo')">
-                <div class="icone-bola">🛠️</div>
-                <span>Reparo</span>
-            </div>
-            <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
-                <div class="icone-bola">🚽</div>
-                <span>Entupiu</span>
-            </div>
+            <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
 
-        <h3 style="font-size:14px; margin-bottom:10px; color: #555;">📍 Técnicos em Itabuna:</h3>
-        <div id="map" style="height: 180px; border-radius: 12px; filter: grayscale(0.3);"></div>
-
-        <div id="colaboradores-no-mapa">
+        <div class="secao-titulo">👨‍🔧 Profissionais Disponíveis:</div>
+        <div id="lista-tecnicos">
             </div>
 
-        <div id="form-container" style="display:none; margin-top:30px;">
+        <div class="secao-titulo">📍 Área de Cobertura:</div>
+        <div id="map"></div>
+
+        <div id="form-container" style="display:none;">
             <form id="formOrcamento">
-                <h3 style="color:#25d366; text-align:center">✅ Pagamento Liberado!</h3>
+                <h3 style="color:#25d366; text-align:center">✅ Acesso Liberado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
                 <input type="text" id="end" placeholder="Endereço em Itabuna" required>
                 <input type="text" id="serv_display" readonly>
-                <textarea id="msg" placeholder="Detalhes do problema..." rows="3"></textarea>
-                <button type="submit" style="background:#25d366">Enviar Pedido via WhatsApp 💬</button>
+                <textarea id="msg" placeholder="Descreva o problema..." rows="3"></textarea>
+                <button type="submit" style="background:#25d366">Enviar no WhatsApp do Gestor 💬</button>
             </form>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://ones-ghz-saint-supposed.trycloudflare.com";
-        const MEU_WHATSAPP = "5573988478170";
+        const API_BASE = "https://strip-designation-southeast-total.trycloudflare.com";
+        const WHATS_GESTOR = "5573988478170";
 
-        // 1. INICIALIZAR MAPA (ITABUNA)
+        // Configuração do Mapa
         const map = L.map('map', { zoomControl: false }).setView([-14.7967, -39.2814], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.circle([-14.7967, -39.2814], { color: 'red', fillOpacity: 0.1, radius: 3500 }).addTo(map);
+        L.circle([-14.7967, -39.2814], { color: 'red', fillOpacity: 0.1, radius: 3000 }).addTo(map);
 
-        // 2. FUNÇÃO MENU LATERAL
         function toggleNav() {
             const s = document.getElementById("mySidebar");
             s.style.width = s.style.width === "250px" ? "0" : "250px";
         }
 
-        // 3. CARREGAR COLABORADORES APROVADOS (CARDS)
-        async function carregarTecnicos() {
+        // Carregar técnicos aprovados nos cards
+        async function carregarCardsTecnicos() {
             try {
                 const res = await fetch(`${API_BASE}/api/aprovados`);
                 const tecnicos = await res.json();
-                const container = document.getElementById('colaboradores-no-mapa');
+                const container = document.getElementById('lista-tecnicos');
                 
                 if(tecnicos.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; font-size:12px; color:#999;'>Aguardando técnicos online...</p>";
+                    container.innerHTML = "<p style='font-size:12px; color:#999;'>Buscando profissionais...</p>";
                     return;
                 }
 
                 container.innerHTML = tecnicos.map(t => `
                     <div class="card-tecnico">
                         <div class="tecnico-info">
-                            <span style="font-size: 24px;">👨‍🔧</span>
+                            <span style="font-size: 26px;">👨‍🔧</span>
                             <div class="tecnico-texto">
                                 <b>${t.nome}</b>
-                                <span>${t.funcao} • <small style="color:#25d366">Disponível</small></span>
+                                <span>${t.funcao} • <small style="color:#25d366">● Online</small></span>
                             </div>
                         </div>
                         <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" target="_blank" class="btn-whats-tecnico">
-                            <i class="fab fa-whatsapp"></i><span style="font-size:10px; vertical-align:middle;"> 🟢</span>
+                            <i class="fab fa-whatsapp"></i>
                         </a>
                     </div>
                 `).join('');
-            } catch (e) {
-                console.error("Erro ao carregar técnicos:", e);
-            }
+            } catch (e) { console.error("Erro técnicos:", e); }
         }
 
-        // 4. VERIFICAR STATUS DO SERVIDOR
         async function checkStatus() {
-            const statusEl = document.getElementById('sys-status');
+            const el = document.getElementById('sys-status');
             try {
                 const res = await fetch(`${API_BASE}/api/galeria`);
-                statusEl.innerHTML = res.ok ? `<span class="dot online"></span> Sistema Online` : `<span class="dot offline"></span> Sistema Offline`;
-            } catch (e) {
-                statusEl.innerHTML = `<span class="dot offline"></span> Servidor Desligado`;
-            }
+                el.innerHTML = res.ok ? `<span class="dot online"></span> Sistema Online` : `<span class="dot offline"></span> Offline`;
+            } catch (e) { el.innerHTML = `<span class="dot offline"></span> Offline`; }
         }
 
-        // 5. PROCESSO DE PIX E LIBERAÇÃO
         async function abrirPix(servico) {
             const idGerado = Math.floor(1000 + Math.random() * 9000).toString();
             const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
-            const linkWhats = `https://wa.me/${MEU_WHATSAPP}?text=${encodeURIComponent('Olá, código #' + idGerado + '. Pagamento realizado aguardando liberação.')}`;
-
+            
             Swal.fire({
-                title: 'Reserva de Serviço',
+                title: 'Reserva',
                 html: `
-                    <p style="font-size:13px; margin-bottom:5px;">CÓDIGO DE IDENTIFICAÇÃO:</p>
-                    <span class="pedido-id-vermelho">#${idGerado}</span>
-                    <button onclick="window.open('${linkWhats}', '_blank')" style="background:#25d366; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; margin-bottom:15px;">ENVIAR CÓDIGO NO WHATSAPP 💬</button>
-                    <p style="font-size:12px">Pague o QR Code para liberar o formulário:</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin:10px 0;">
+                    <p>Código: <b style="color:red">#${idGerado}</b></p>
+                    <button onclick="window.open('https://wa.me/${WHATS_GESTOR}?text=Pagamento%20ID%20${idGerado}')" style="background:#25d366; color:white; border:none; padding:10px; border-radius:5px; width:100%;">AVISAR PAGAMENTO 💬</button>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-top:15px;">
                 `,
-                allowOutsideClick: false,
                 showConfirmButton: false
             });
 
-            // Registrar no servidor
             await fetch(`${API_BASE}/api/registrar-id`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({id_visto: idGerado, servico}) 
             });
 
-            // Loop de verificação de status
             const timer = setInterval(async () => {
                 const res = await fetch(`${API_BASE}/api/status/${idGerado}`);
                 const d = await res.json();
                 if(d.status === 'liberado') { 
-                    clearInterval(timer); 
-                    Swal.close(); 
+                    clearInterval(timer); Swal.close(); 
                     document.getElementById('form-container').style.display = 'block'; 
                     document.getElementById('serv_display').value = servico;
                     document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
@@ -163,25 +179,16 @@
             }, 3000);
         }
 
-        // 6. ENVIO DO FORMULÁRIO FINAL
         document.getElementById('formOrcamento').onsubmit = (e) => {
             e.preventDefault();
-            const n = document.getElementById('nome').value;
-            const ed = document.getElementById('end').value;
-            const ms = document.getElementById('msg').value;
-            const sv = document.getElementById('serv_display').value;
-            
-            const texto = `*NOVO PEDIDO CONFIRMADO*%0A*Serviço:* ${sv}%0A*Nome:* ${n}%0A*Endereço:* ${ed}%0A*Detalhes:* ${ms}`;
-            window.open(`https://wa.me/${MEU_WHATSAPP}?text=${texto}`, '_blank');
+            const texto = `*NOVO PEDIDO*%0A*Serviço:* ${document.getElementById('serv_display').value}%0A*Nome:* ${document.getElementById('nome').value}%0A*End:* ${document.getElementById('end').value}`;
+            window.open(`https://wa.me/${WHATS_GESTOR}?text=${texto}`, '_blank');
         };
 
-        // INICIALIZAÇÃO
         checkStatus();
         setInterval(checkStatus, 5000);
-        carregarTecnicos();
-        // Recarregar técnicos a cada 30 segundos para atualizar a lista
-        setInterval(carregarTecnicos, 30000);
-
+        carregarCardsTecnicos();
+        setInterval(carregarCardsTecnicos, 20000);
     </script>
 </body>
 </html>
