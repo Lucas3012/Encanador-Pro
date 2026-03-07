@@ -22,7 +22,7 @@
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
-         <a href="historico.html">📋 Histórico</a>
+        <a href="historico.html">📋 Histórico</a>
         <a href="galeria.html">📸 Galeria</a>
         <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
         <a href="admin.html">🔐 Painel Admin</a>
@@ -35,84 +35,148 @@
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
 
-        <div class="secao-titulo">👨‍🔧 Profissionais em Itabuna:</div>
+        <div class="secao-titulo">👨‍🔧 Profissionais Online:</div>
         <div id="lista-tecnicos"></div>
 
         <div class="secao-titulo">📍 Área de Cobertura:</div>
         <div id="map" style="height: 250px; border-radius: 15px; margin-bottom: 20px;"></div>
 
-        <div id="form-container" style="display:none;">
+        <div id="form-container" style="display:none; background: #f9f9f9; padding: 20px; border-radius: 15px; border: 2px dashed #25d366;">
             <form id="formOrcamento">
                 <h3 style="color:#25d366; text-align:center">✅ Acesso Liberado!</h3>
+                <p style="font-size: 12px; text-align: center; margin-bottom: 15px;">Preencha os detalhes para chamar o técnico.</p>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
                 <input type="text" id="end" placeholder="Endereço em Itabuna" required>
-                <input type="text" id="serv_display" readonly>
-                <textarea id="msg" placeholder="Descreva o problema..." rows="3"></textarea>
-                <button type="submit" style="background:#25d366">Enviar no WhatsApp 💬</button>
+                <input type="text" id="serv_display" readonly style="background: #eee;">
+                <textarea id="msg" placeholder="Descreva o que aconteceu..." rows="3"></textarea>
+                <button type="submit" style="background:#25d366; font-weight: bold;">CHAMAR NO WHATSAPP 💬</button>
             </form>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://orders-candles-roy-lay.trycloudflare.com";
+        const API_BASE = "https://backup-nutrition-telephony-homepage.trycloudflare.com";
         const WHATS_GESTOR = "5573988478170";
 
-        // Inicialização do Mapa com correção de carregamento
-        let map;
-        function initMap() {
-            map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            L.circle([-14.7924, -39.2821], { color: 'blue', fillOpacity: 0.1, radius: 3000 }).addTo(map);
-            
-            // Força o redimensionamento para garantir que aparece
-            setTimeout(() => { map.invalidateSize(); }, 500);
-        }
+        // Inicializar Mapa
+        const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.circle([-14.7924, -39.2821], { color: 'blue', fillOpacity: 0.1, radius: 3000 }).addTo(map);
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
             s.style.width = s.style.width === "250px" ? "0" : "250px";
         }
 
-        async function carregarCardsTecnicos() {
-            try {
-                const res = await fetch(`${API_BASE}/api/aprovados`);
-                const tecnicos = await res.json();
-                const container = document.getElementById('lista-tecnicos');
-                if(tecnicos.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; color:#999;'>Buscando profissionais...</p>";
-                    return;
-                }
-                container.innerHTML = tecnicos.map(t => `
-                    <div class="card-tecnico">
-                        <div class="tecnico-info">
-                            <span style="font-size: 26px;">👨‍🔧</span>
-                            <div class="tecnico-texto"><b>${t.nome}</b><span>${t.funcao} • <small style="color:#25d366">● Online</small></span></div>
-                        </div>
-                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" target="_blank" class="btn-whats-tecnico pulse-green">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="40">
-                        </a>
-                    </div>`).join('');
-            } catch (e) { console.error(e); }
-        }
-
+        // Abrir Modal de Pagamento
         async function abrirPix(servico) {
-            const idGerado = Math.floor(1000 + Math.random() * 9000).toString();
+            // Gera um ID de 4 dígitos (Apenas números para o banco)
+            const idLimpo = Math.floor(1000 + Math.random() * 9000).toString();
+            const chavePix = "SUA_CHAVE_PIX_AQUI"; // Coloque sua chave aqui
+
             Swal.fire({
-                title: 'Pagamento de Reserva',
-                html: `<p>Código: <b style="color:red; font-size:24px;">#${idGerado}</b></p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_PIX" style="margin:15px 0;">
-                <button onclick="window.open('https://wa.me/${WHATS_GESTOR}?text=Paguei%20ID%20${idGerado}')" style="background:#25d366; color:white; border:none; padding:12px; border-radius:8px; width:100%; cursor:pointer;">AVISAR NO WHATSAPP 💬</button>`,
+                title: 'Reserva de Atendimento',
+                html: `
+                    <p style="margin-bottom: 10px;">ID do Pedido: <b style="color:red; font-size:22px;">#${idLimpo}</b></p>
+                    <div style="background: #f0f0f0; padding: 10px; border-radius: 8px; font-size: 13px;">
+                        Pague o valor da visita e clique no botão abaixo para avisar o mestre.
+                    </div>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(chavePix)}" style="margin: 15px 0;">
+                    <button onclick="window.open('https://wa.me/${WHATS_GESTOR}?text=Paguei%20o%20ID%20${idLimpo}')" 
+                            style="background:#25d366; color:white; border:none; padding:12px; border-radius:8px; width:100%; cursor:pointer; font-weight:bold;">
+                        AVISAR PAGAMENTO NO WHATSAPP 💬
+                    </button>
+                    <p style="font-size:11px; color: #888; margin-top:10px;">Aguarde nesta tela após pagar. O formulário será liberado automaticamente.</p>
+                `,
                 showConfirmButton: false,
                 allowOutsideClick: false
             });
 
-            // Lógica de verificação do ID... (mesma do anterior)
+            // Registrar no servidor (Envia o ID limpo)
+            try {
+                await fetch(`${API_BASE}/api/registrar-id`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id_visto: idLimpo, servico: servico })
+                });
+
+                // Iniciar monitoramento
+                const checarStatus = setInterval(async () => {
+                    const res = await fetch(`${API_BASE}/api/status/${idLimpo}`);
+                    const data = await res.json();
+
+                    if (data.status === 'liberado') {
+                        clearInterval(checarStatus);
+                        Swal.close();
+                        Swal.fire('Sucesso!', 'Pagamento confirmado! Preencha os dados abaixo.', 'success');
+                        
+                        // Mostra o formulário
+                        document.getElementById('form-container').style.display = 'block';
+                        document.getElementById('serv_display').value = servico;
+                        document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 3000); // Checa a cada 3 segundos
+
+            } catch (e) {
+                Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+            }
+        }
+
+        // Envio do formulário final para o WhatsApp do Gestor
+        document.getElementById('formOrcamento').onsubmit = (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const end = document.getElementById('end').value;
+            const serv = document.getElementById('serv_display').value;
+            const msg = document.getElementById('msg').value;
+
+            const texto = `*NOVO PEDIDO LIBERADO*%0A%0A*Cliente:* ${nome}%0A*Serviço:* ${serv}%0A*Endereço:* ${end}%0A*Problema:* ${msg}`;
+            window.open(`https://wa.me/${WHATS_GESTOR}?text=${texto}`, '_blank');
+        };
+
+        // Carregar Cards de Técnicos
+        async function carregarTecnicos() {
+            try {
+                const res = await fetch(`${API_BASE}/api/aprovados`);
+                const tecnicos = await res.json();
+                const container = document.getElementById('lista-tecnicos');
+                
+                if (tecnicos.length === 0) {
+                    container.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>Buscando técnicos disponíveis...</p>";
+                    return;
+                }
+
+                container.innerHTML = tecnicos.map(t => `
+                    <div class="card-tecnico">
+                        <div class="tecnico-info">
+                            <span style="font-size: 26px;">👨‍🔧</span>
+                            <div class="tecnico-texto">
+                                <b>${t.nome}</b>
+                                <span>${t.funcao} • <small style="color:#25d366">● Online</small></span>
+                            </div>
+                        </div>
+                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" target="_blank" class="btn-whats-tecnico">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="40">
+                        </a>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        // Status do Sistema
+        async function checkStatus() {
+            const el = document.getElementById('sys-status');
+            try {
+                const res = await fetch(`${API_BASE}/api/galeria`);
+                el.innerHTML = res.ok ? `<span class="dot online"></span> Sistema Online` : `<span class="dot offline"></span> Offline`;
+            } catch (e) { el.innerHTML = `<span class="dot offline"></span> Offline`; }
         }
 
         window.onload = () => {
-            initMap();
-            carregarCardsTecnicos();
+            checkStatus();
+            carregarTecnicos();
+            setInterval(checkStatus, 10000);
         };
     </script>
 </body>
