@@ -2,21 +2,22 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Mestre</title>
+    <title>Admin - Gestão</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Painel Mestre</b></div>
     <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
-        <a href="galeria.html">📸 Galeria</a>
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div id="login-screen" class="container">
-        <h2 style="text-align:center">Acesso</h2>
-        <input type="password" id="admin-pass" placeholder="Senha">
-        <button onclick="fazerLogin()">Entrar</button>
+        <h2 style="text-align:center">Acesso Admin</h2>
+        <input type="password" id="admin-pass" placeholder="Senha de Acesso">
+        <button onclick="fazerLogin()">ENTRAR</button>
     </div>
 
     <div id="panel-content" style="display:none">
@@ -28,77 +29,72 @@
 
         <div id="tab-pix" class="admin-section active container">
             <input type="number" id="input-id" placeholder="Cód 4 Dígitos">
-            <button onclick="validarID()" style="background:var(--secondary)">LIBERAR CLIENTE</button>
+            <button onclick="validarID()">LIBERAR CLIENTE</button>
         </div>
 
         <div id="tab-galeria" class="admin-section container"><div id="lista-pendentes"></div></div>
-
         <div id="tab-colab" class="admin-section container"><div id="lista-colabs"></div></div>
     </div>
 
     <script>
         const API = "http://localhost:3000";
-
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
+        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
 
         function fazerLogin() {
             if(document.getElementById('admin-pass').value === '1234') {
+                Swal.fire('Acesso Autorizado', '', 'success');
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('panel-content').style.display = 'block';
-            } else { alert("Senha incorreta!"); }
+            } else { Swal.fire('Erro', 'Senha incorreta', 'error'); }
         }
 
         function mudarAba(id, btn) {
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active'); btn.classList.add('active');
-            if(id === 'tab-galeria') carregarGaleria();
+            if(id === 'tab-galeria') carregarPendentes();
             if(id === 'tab-colab') carregarColabs();
         }
 
-        async function carregarGaleria() {
+        async function carregarPendentes() {
             const res = await fetch(`${API}/api/admin/pendentes`);
             const fotos = await res.json();
             document.getElementById('lista-pendentes').innerHTML = fotos.map(f => `
                 <div class="admin-card">
                     <img src="${API}/temp/${f}">
                     <div class="admin-acoes">
-                        <button class="btn-aprovar" onclick="decidirFoto('${f}','aprovar')">✅</button>
-                        <button class="btn-excluir" onclick="decidirFoto('${f}','deletar')">❌</button>
+                        <button class="btn-aprovar" onclick="decidirFoto('${f}','aprovar')">APROVAR</button>
+                        <button class="btn-excluir" onclick="decidirFoto('${f}','deletar')">EXCLUIR</button>
                     </div>
                 </div>`).join('');
         }
 
         async function decidirFoto(foto, acao) {
             await fetch(`${API}/api/admin/decidir-foto`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({foto, acao}) });
-            carregarGaleria();
+            Swal.fire('Sucesso', 'Ação concluída', 'success'); carregarPendentes();
         }
 
         async function carregarColabs() {
             const res = await fetch(`${API}/api/admin/colaboradores`);
             const colabs = await res.json();
             document.getElementById('lista-colabs').innerHTML = colabs.map(c => `
-                <div class="admin-card" style="text-align:left;">
+                <div class="admin-card">
                     <b>${c.nome}</b> (${c.funcao})
-                    ${!c.aprovado ? `
-                    <div class="admin-acoes">
-                        <button class="btn-aprovar" onclick="decidirColab('${c.id}','aprovar')">✅ APROVAR NO MAPA</button>
-                    </div>` : '<p style="color:green">Aparecendo no Mapa</p>'}
+                    ${!c.aprovado ? `<button onclick="decidirColab('${c.id}','aprovar')">APROVAR NO MAPA</button>` : '<p style="color:green">Aprovado</p>'}
+                    <button onclick="decidirColab('${c.id}','deletar')" style="background:red; margin-top:5px;">REMOVER</button>
                 </div>`).join('');
         }
 
         async function decidirColab(id, acao) {
             await fetch(`${API}/api/admin/decidir-colaborador`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id, acao}) });
-            carregarColabs();
+            Swal.fire('Atualizado', 'Status alterado!', 'success'); carregarColabs();
         }
 
         async function validarID() {
             const id = document.getElementById('input-id').value;
             const res = await fetch(`${API}/api/admin/liberar-por-id`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_visto: id}) });
-            if(res.ok) alert("Cliente liberado!");
+            if(res.ok) Swal.fire('Liberado!', `Cliente #${id} ok.`, 'success');
+            else Swal.fire('Erro', 'ID não encontrado', 'error');
         }
     </script>
 </body>

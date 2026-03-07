@@ -4,15 +4,12 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trabalhe Conosco</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <b>Seja Parceiro</b>
-    </div>
-
+    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Seja Parceiro</b></div>
     <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" onclick="toggleNav()" style="font-size:30px; text-align:right; padding-right:20px;">×</a>
+        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
         <a href="galeria.html">📸 Galeria</a>
         <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
@@ -22,28 +19,21 @@
     <div class="container">
         <form id="formColab">
             <input type="text" id="n" placeholder="Nome Completo" required>
-            <input type="tel" id="t" placeholder="WhatsApp" required>
-            <select id="fun">
-                <option value="Encanador">Encanador</option>
-                <option value="Eletricista">Eletricista</option>
-                <option value="Ajudante">Ajudante</option>
-            </select>
-            <textarea id="e" placeholder="Sua experiência..." rows="4"></textarea>
-            <button type="submit">Enviar Candidatura</button>
+            <input type="tel" id="t" placeholder="WhatsApp (DDD + Número)" required>
+            <select id="fun"><option value="Encanador">Encanador</option><option value="Eletricista">Eletricista</option></select>
+            <textarea id="e" placeholder="Experiência..."></textarea>
+            <button type="submit">CADASTRAR E APARECER NO MAPA</button>
         </form>
     </div>
 
     <script>
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
-
+        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
         document.getElementById('formColab').onsubmit = async (e) => {
             e.preventDefault();
+            Swal.fire({ title: 'Processando...', didOpen: () => Swal.showLoading() });
             const dados = { nome: document.getElementById('n').value, telefone: document.getElementById('t').value, funcao: document.getElementById('fun').value, exp: document.getElementById('e').value };
             await fetch('http://localhost:3000/api/colaborador', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dados) });
-            alert("Cadastro realizado!"); location.href="index.html";
+            Swal.fire('Sucesso!', 'Seu cadastro foi enviado.', 'success').then(() => location.href="index.html");
         };
     </script>
 </body>
