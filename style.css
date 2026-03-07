@@ -1,299 +1,100 @@
-/* VARIÁVEIS DE CORES */
 :root {
     --primary: #007bff;
     --secondary: #25d366;
     --dark: #333;
-    --light: #f4f4f4;
     --white: #ffffff;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
 body { 
-    /* ADICIONADO: Configuração da imagem de fundo */
     background-image: url('fundo-banheiro.jpg');
-    background-size: cover; /* Cobre toda a tela */
-    background-position: center; /* Centraliza a imagem */
-    background-attachment: fixed; /* O fundo não rola junto com a página */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     color: var(--dark); 
 }
 
-/* BARRA DE STATUS NO TOPO */
-.status-bar {
-    background: #e9ecef;
-    padding: 8px 15px;
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-}
-
-.dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-.online { background-color: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
-.offline { background-color: #dc3545; }
-
-/* HEADER E MENU */
+/* HEADER E LOGO CENTRALIZADO */
 .header {
     background: var(--primary);
     color: var(--white);
-    padding: 15px;
+    padding: 12px 15px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.logo-centralizado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    flex: 1;
+    margin: 0;
+}
+
+.drop-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.4));
+    animation: drip 2s infinite ease-in-out;
+}
+
+@keyframes drip {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
 }
 
 .menu-icon { font-size: 24px; cursor: pointer; }
 
-/* SIDEBAR */
-.sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 2000;
-    top: 0;
-    left: 0;
-    background-color: var(--dark);
-    overflow-x: hidden;
-    transition: 0.3s;
-    padding-top: 60px;
-}
-
-.sidebar a {
-    padding: 15px 25px;
-    text-decoration: none;
-    font-size: 18px;
-    color: #818181;
-    display: block;
-    transition: 0.2s;
-}
-
-.sidebar a:hover { color: var(--white); background: #444; }
-
-.sidebar .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 25px;
-    font-size: 36px;
-}
-
-/* CONTAINER PRINCIPAL */
+/* CONTAINER TRANSLÚCIDO */
 .container { 
-    /* MODIFICADO: Transparência para ver o fundo, mas manter o texto legível */
-    background-color: rgba(255, 255, 255, 0.9); 
+    background-color: rgba(255, 255, 255, 0.92); 
     padding: 20px; 
-    max-width: 500px; 
-    margin: auto; 
-    margin-top: 20px; 
-    margin-bottom: 20px;
-    border-radius: 15px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-width: 480px; 
+    margin: 20px auto; 
+    border-radius: 20px; 
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
 }
 
-/* BOTÕES DE SERVIÇO (HOME) */
-.servicos-destaque {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-}
+/* STATUS BAR */
+.status-bar { background: rgba(233, 236, 239, 0.9); padding: 8px 15px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+.dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.online { background-color: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
+.offline { background-color: #dc3545; }
 
-.circulo-servico {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-}
+/* SIDEBAR */
+.sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: var(--dark); overflow-x: hidden; transition: 0.3s; padding-top: 60px; }
+.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
+.sidebar .close-btn { position: absolute; top: 10px; right: 25px; font-size: 36px; }
 
-.icone-bola {
-    width: 65px;
-    height: 65px;
-    background: var(--white);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin-bottom: 8px;
-    border: 2px solid var(--primary);
-}
+/* SERVIÇOS */
+.servicos-destaque { display: flex; justify-content: space-around; margin: 20px 0; }
+.circulo-servico { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 12px; font-weight: bold; }
+.icone-bola { width: 60px; height: 60px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 5px; border: 2px solid var(--primary); }
 
-/* CARDS DOS TÉCNICOS */
-.card-tecnico {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    border-left: 5px solid var(--primary);
-    margin-bottom: 12px;
-}
+/* CARDS TÉCNICOS */
+.card-tecnico { background: var(--white); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.tecnico-info b { display: block; font-size: 14px; }
+.tecnico-info span { font-size: 11px; color: #666; }
+.btn-whats-tecnico { text-decoration: none; font-size: 20px; }
 
-.tecnico-info { display: flex; align-items: center; gap: 12px; }
-.tecnico-texto b { display: block; font-size: 15px; }
-.tecnico-texto span { font-size: 12px; color: #777; }
+/* CHATBOT */
+#chat-button { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+#chat-greeting { position: fixed; bottom: 90px; right: 25px; background: white; padding: 12px; border-radius: 15px 15px 0 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size: 13px; z-index: 2900; display: none; border: 1px solid #eee; animation: bounceIn 0.8s ease; }
+#chat-window { position: fixed; bottom: 90px; right: 20px; width: 280px; height: 380px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 3000; box-shadow: 0 5px 25px rgba(0,0,0,0.2); overflow: hidden; }
 
-/* PULSO DO WHATSAPP */
-.pulse-green {
-    animation: pulse-animation 2s infinite;
-    border-radius: 50%;
-}
-@keyframes pulse-animation {
-    0% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-    100% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0); }
-}
+/* FORMULÁRIOS */
+input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; }
+button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; }
 
-/* FORMULÁRIOS E INPUTS */
-input, textarea, select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    outline: none;
-}
-button {
-    width: 100%;
-    padding: 15px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-/* CONTAINER DA GRADE DE FOTOS */
-.galeria-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Cria colunas automáticas */
-    gap: 12px; /* Espaço entre as fotos */
-    padding: 10px 0;
-}
-
-/* CADA ITEM DA FOTO */
-.foto-item {
-    aspect-ratio: 1 / 1; /* Faz a foto ser sempre um quadrado perfeito */
-    overflow: hidden;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border: 3px solid white;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.foto-item:hover {
-    transform: scale(1.05); /* Efeito de zoom ao tocar/passar o mouse */
-}
-
-.foto-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Faz a imagem preencher o quadrado sem distorcer */
-}
-/* BOTÃO FLUTUANTE DO CHAT */
-#chat-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: #007bff;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 3000;
-    transition: 0.3s;
-}
-
-#chat-button:hover { transform: scale(1.1); }
-
-/* JANELA DO CHAT */
-#chat-window {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 300px;
-    height: 400px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-    display: none; /* Começa escondido */
-    flex-direction: column;
-    z-index: 3000;
-    overflow: hidden;
-}
-
-.chat-header {
-    background: #007bff;
-    color: white;
-    padding: 15px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    font-size: 14px;
-    background: #f8f9fa;
-}
-
-.msg-bot { background: #e9ecef; padding: 8px; border-radius: 10px; margin-bottom: 10px; align-self: flex-start; }
-.msg-user { background: #007bff; color: white; padding: 8px; border-radius: 10px; margin-bottom: 10px; align-self: flex-end; text-align: right; }
-
-.chat-input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-}
-
-.chat-input-area input { margin-bottom: 0; flex: 1; padding: 8px; }
-.chat-input-area button { width: auto; padding: 8px 15px; margin-left: 5px; }
-/* BALÃO DE SAUDAÇÃO AUTOMÁTICA */
-#chat-greeting {
-    position: fixed;
-    bottom: 90px;
-    right: 25px;
-    background: white;
-    padding: 12px 18px;
-    border-radius: 15px 15px 0 15px; /* Formato de balão de fala */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    z-index: 2900;
-    display: none; /* Começa escondido */
-    animation: bounceIn 0.8s ease; /* Efeito de entrada */
-    border: 1px solid #eee;
-}
-
-#chat-greeting::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    right: 15px;
-    border-width: 10px 10px 0 0;
-    border-style: solid;
-    border-color: white transparent transparent transparent;
-}
-
-@keyframes bounceIn {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.05); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); opacity: 1; }
-}
+.secao-titulo { font-weight: bold; margin: 15px 0 10px 0; font-size: 14px; color: var(--primary); text-transform: uppercase; }
