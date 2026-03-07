@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Encanador Pro - Itabuna</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -23,7 +24,7 @@
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
-        <a href="admin.html">🔐 Admin</a>
+        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
@@ -36,11 +37,14 @@
         <div class="secao-titulo">👨‍🔧 Profissionais Online:</div>
         <div id="lista-tecnicos"></div>
 
-        <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-top: 20px;">
+        <div class="secao-titulo">📍 Cobertura em Itabuna:</div>
+        <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #fff;"></div>
+
+        <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366;">
             <form id="formOrcamento">
                 <input type="text" id="end" placeholder="Seu Endereço em Itabuna" required>
                 <input type="text" id="serv_display" readonly>
-                <button type="submit" style="background:#25d366; color:white;">CHAMAR NO WHATSAPP</button>
+                <button type="submit" style="background:#25d366; color:white; font-weight:bold;">CHAMAR NO WHATSAPP</button>
             </form>
         </div>
     </div>
@@ -56,9 +60,14 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // COLOQUE SEU LINK DA CLOUDFLARE AQUI:
-        const API_BASE = "https://circumstances-view-rainbow-game.trycloudflare.com";
+        // MUDAR PARA SEU LINK DA CLOUDFLARE
+        const API_BASE = "https://perfume-suppliers-investigator-aircraft.trycloudflare.com";
+
+        // INICIALIZAR MAPA
+        const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
@@ -71,6 +80,20 @@
             document.getElementById('chat-greeting').style.display = 'none';
         }
 
+        // CARREGAR TÉCNICOS NOS CARDS
+        async function carregarTecnicos() {
+            try {
+                const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
+                const dados = await res.json();
+                document.getElementById('lista-tecnicos').innerHTML = dados.map(t => `
+                    <div class="card-tecnico">
+                        <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
+                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
+                    </div>
+                `).join('') || "Buscando técnicos...";
+            } catch(e) {}
+        }
+
         async function checkStatus() {
             try {
                 const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
@@ -80,7 +103,7 @@
 
         async function abrirPix(servico) {
             const id = Math.floor(1000 + Math.random() * 9000).toString();
-            Swal.fire({ title: 'ID: #'+id, html: 'Pague o Pix para liberar o técnico.', showConfirmButton: false });
+            Swal.fire({ title: 'ID: #'+id, text: 'Pague o Pix para liberar o formulário.', showConfirmButton: false });
             
             await fetch(`${API_BASE}/api/registrar-id`, { 
                 method: 'POST', 
@@ -111,7 +134,7 @@
             if(!msg) return;
             adicionarMsg(msg, 'msg-user'); input.value = '';
 
-            // Captura telefone
+            // Captura Telefone
             if (msg.replace(/\D/g,'').length >= 8) {
                 fetch(`${API_BASE}/api/contato-chatbot`, { 
                     method: 'POST', 
@@ -128,10 +151,16 @@
                 });
                 const data = await res.json();
                 adicionarMsg(data.resposta, 'msg-bot');
-            } catch (e) { adicionarMsg("Erro na conexão.", "msg-bot"); }
+            } catch (e) { 
+                adicionarMsg("Erro de conexão com a IA. Deixe seu WhatsApp!", "msg-bot"); 
+            }
         }
 
-        window.onload = () => { checkStatus(); setInterval(checkStatus, 15000); };
+        window.onload = () => {
+            carregarTecnicos();
+            checkStatus();
+            setInterval(checkStatus, 15000);
+        };
     </script>
 </body>
 </html>
