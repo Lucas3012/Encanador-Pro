@@ -44,7 +44,7 @@ if [ ! -z "$LINK" ]; then
     echo "📂 Enviando atualizações para o GitHub..."
     git add .
     git commit -m "Auto-update: $LINK"
-    git push origin main
+    git push origin main --force
     
     echo "------------------------------------------"
     echo "✅ TUDO PRONTO E ONLINE!"
