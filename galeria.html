@@ -2,13 +2,21 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria Pro</title>
+    <title>Galeria - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <b>Galeria de Serviços</b>
+        <b>Nossa Galeria</b>
+    </div>
+
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" onclick="toggleNav()" style="font-size:30px; text-align:right; padding-right:20px;">×</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="galeria.html">📸 Galeria</a>
+        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
+        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
@@ -23,14 +31,16 @@
     <input type="file" id="fileInput" style="display:none" onchange="subirFoto(this)">
 
     <script>
-        function toggleNav() { /* função de abrir sidebar */ }
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
 
         async function carregarGaleria() {
             const res = await fetch('http://localhost:3000/api/galeria');
             const fotos = await res.json();
-            const container = document.getElementById('fotos-container');
-            container.innerHTML = fotos.map(f => `
-                <img src="http://localhost:3000/fotos/${f}" alt="Trabalho Realizado">
+            document.getElementById('fotos-container').innerHTML = fotos.map(f => `
+                <img src="http://localhost:3000/fotos/${f}" alt="Trabalho">
             `).join('');
         }
 
@@ -38,7 +48,7 @@
             const formData = new FormData();
             formData.append('foto', input.files[0]);
             await fetch('http://localhost:3000/api/upload-galeria', { method:'POST', body:formData });
-            alert("Sua foto foi enviada para o mestre aprovar!");
+            alert("Foto enviada para aprovação!");
         }
 
         carregarGaleria();

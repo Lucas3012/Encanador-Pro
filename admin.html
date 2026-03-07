@@ -1,156 +1,101 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Gestor - Encanador Pro</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gestão</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="header">
-        <b>🔐 Painel Administrativo</b>
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <b>🔐 Painel Mestre</b>
+    </div>
+
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" onclick="toggleNav()" style="font-size:30px; text-align:right; padding-right:20px;">×</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="galeria.html">📸 Galeria</a>
+        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
+        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div id="login-screen" class="container">
-        <h2 style="text-align:center; margin-bottom: 20px;">Acesso Restrito</h2>
-        <input type="password" id="admin-pass" placeholder="Digite a senha de acesso">
-        <button onclick="fazerLogin()">ENTRAR NO PAINEL</button>
+        <h2 style="text-align:center">Acesso Admin</h2>
+        <input type="password" id="admin-pass" placeholder="Senha">
+        <button onclick="fazerLogin()">Entrar</button>
     </div>
 
     <div id="panel-content" style="display:none">
         <div class="admin-tabs">
-            <button class="tab-btn active" onclick="mudarAba('tab-pix', this)">📋 PEDIDOS</button>
+            <button class="tab-btn active" onclick="mudarAba('tab-pix', this)">📋 PIX</button>
             <button class="tab-btn" onclick="mudarAba('tab-galeria', this)">📸 GALERIA</button>
             <button class="tab-btn" onclick="mudarAba('tab-colab', this)">👷 COLAB</button>
         </div>
 
         <div id="tab-pix" class="admin-section active container">
-            <h3 style="text-align:center; margin-bottom:15px;">Validar Código do Cliente</h3>
-            <p style="font-size:14px; text-align:center; color:#666; margin-bottom:10px;">
-                Digite os 4 dígitos que o cliente enviou no WhatsApp:
-            </p>
-            <input type="number" id="input-id" placeholder="Ex: 1234" style="font-size: 24px; text-align: center; letter-spacing: 5px;">
-            <button onclick="validarID()" style="background:var(--secondary); margin-top:10px;">✅ LIBERAR FORMULÁRIO</button>
-            <div id="res-pix" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <input type="number" id="input-id" placeholder="Cód 4 Dígitos">
+            <button onclick="validarID()" style="background:var(--secondary)">LIBERAR CLIENTE</button>
         </div>
 
         <div id="tab-galeria" class="admin-section container">
-            <h3 style="text-align:center; margin-bottom:20px;">Fotos Pendentes</h3>
-            <div id="lista-pendentes">
-                </div>
+            <div id="lista-pendentes"></div>
         </div>
 
         <div id="tab-colab" class="admin-section container">
-            <h3 style="text-align:center; margin-bottom:20px;">Candidatos (Trabalhe Conosco)</h3>
-            <div id="lista-colabs">
-                </div>
+            <div id="lista-colabs"></div>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://smallest-mario-run-tolerance.trycloudflare.com";
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
 
-        // 1. Função de Login
         function fazerLogin() {
-            const pass = document.getElementById('admin-pass').value;
-            if(pass === '1234') { // Senha que definimos
+            if(document.getElementById('admin-pass').value === '1234') {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('panel-content').style.display = 'block';
-                carregarPendentes();
-                carregarColaboradores();
-            } else {
-                alert("Senha incorreta!");
-            }
+            } else { alert("Senha incorreta!"); }
         }
 
-        // 2. Troca de Abas
-        function mudarAba(abaId, btn) {
+        function mudarAba(id, btn) {
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(abaId).classList.add('active');
-            btn.classList.add('active');
-
-            if(abaId === 'tab-galeria') carregarPendentes();
-            if(abaId === 'tab-colab') carregarColaboradores();
+            document.getElementById(id).classList.add('active'); btn.classList.add('active');
+            if(id === 'tab-galeria') carregarPendentes();
+            if(id === 'tab-colab') carregarColabs();
         }
 
-        // 3. Validar Código de 4 Dígitos
-        async function validarID() {
-            const idVisto = document.getElementById('input-id').value;
-            const resDiv = document.getElementById('res-pix');
-
-            if(idVisto.length !== 4) {
-                alert("O código deve ter 4 dígitos!");
-                return;
-            }
-
-            const res = await fetch(`${API_BASE}/api/admin/liberar-por-id`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id_visto: idVisto })
-            });
-
-            if(res.ok) {
-                resDiv.innerHTML = `<span style="color:green">✅ Código #${idVisto} Liberado!</span>`;
-                document.getElementById('input-id').value = "";
-            } else {
-                resDiv.innerHTML = `<span style="color:red">❌ Código não encontrado.</span>`;
-            }
-        }
-
-        // 4. Carregar Fotos Pendentes em CARDS
         async function carregarPendentes() {
-            const res = await fetch(`${API_BASE}/api/admin/pendentes`);
+            const res = await fetch('http://localhost:3000/api/admin/pendentes');
             const fotos = await res.json();
-            const lista = document.getElementById('lista-pendentes');
-
-            if(fotos.length === 0) {
-                lista.innerHTML = "<p style='text-align:center'>Nenhuma foto para aprovar.</p>";
-                return;
-            }
-
-            lista.innerHTML = fotos.map(f => `
+            document.getElementById('lista-pendentes').innerHTML = fotos.map(f => `
                 <div class="admin-card">
-                    <img src="${API_BASE}/temp/${f}">
+                    <img src="http://localhost:3000/temp/${f}">
                     <div class="admin-acoes">
-                        <button class="btn-aprovar" onclick="decidirFoto('${f}', 'aprovar')">APROVAR ✅</button>
-                        <button class="btn-excluir" onclick="decidirFoto('${f}', 'deletar')">EXCLUIR ❌</button>
+                        <button class="btn-aprovar" onclick="decidir('${f}','aprovar')">✅</button>
+                        <button class="btn-excluir" onclick="decidir('${f}','deletar')">❌</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 5. Aprovar ou Deletar Foto
-        async function decidirFoto(foto, acao) {
-            await fetch(`${API_BASE}/api/admin/decidir-foto`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ foto, acao })
-            });
+        async function decidir(foto, acao) {
+            await fetch('http://localhost:3000/api/admin/decidir-foto', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({foto, acao}) });
             carregarPendentes();
         }
 
-        // 6. Carregar Colaboradores
-        async function carregarColaboradores() {
-            const res = await fetch(`${API_BASE}/api/admin/colaboradores`);
-            const colabs = await res.json();
-            const lista = document.getElementById('lista-colabs');
+        async function validarID() {
+            const id = document.getElementById('input-id').value;
+            const res = await fetch(`http://localhost:3000/api/admin/liberar-por-id`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_visto: id}) });
+            if(res.ok) alert("Liberado!");
+        }
 
-            if(colabs.length === 0) {
-                lista.innerHTML = "<p style='text-align:center'>Nenhum cadastro recebido.</p>";
-                return;
-            }
-
-            lista.innerHTML = colabs.map(c => `
-                <div style="border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px; background:#fff;">
-                    <p><b>Nome:</b> ${c.nome}</p>
-                    <p><b>Função:</b> ${c.funcao}</p>
-                    <p><b>WhatsApp:</b> ${c.telefone || 'Não informado'}</p>
-                    <hr style="margin:5px 0; border:0; border-top:1px solid #eee;">
-                    <p style="font-size:13px; color:#555;">${c.exp || 'Sem detalhes'}</p>
-                </div>
-            `).join('');
+        async function carregarColabs() {
+            const res = await fetch('http://localhost:3000/api/admin/colaboradores');
+            const col = await res.json();
+            document.getElementById('lista-colabs').innerHTML = col.map(c => `<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;"><b>${c.nome}</b><br>${c.funcao}</div>`).join('');
         }
     </script>
 </body>
