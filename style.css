@@ -9,7 +9,14 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
-body { background-color: var(--light); color: var(--dark); }
+body { 
+    /* ADICIONADO: Configuração da imagem de fundo */
+    background-image: url('fundo-banheiro.jpg');
+    background-size: cover; /* Cobre toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* O fundo não rola junto com a página */
+    color: var(--dark); 
+}
 
 /* BARRA DE STATUS NO TOPO */
 .status-bar {
@@ -75,7 +82,17 @@ body { background-color: var(--light); color: var(--dark); }
 }
 
 /* CONTAINER PRINCIPAL */
-.container { padding: 20px; max-width: 500px; margin: auto; }
+.container { 
+    /* MODIFICADO: Transparência para ver o fundo, mas manter o texto legível */
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 20px; 
+    max-width: 500px; 
+    margin: auto; 
+    margin-top: 20px; 
+    margin-bottom: 20px;
+    border-radius: 15px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
 
 /* BOTÕES DE SERVIÇO (HOME) */
 .servicos-destaque {
@@ -133,32 +150,6 @@ body { background-color: var(--light); color: var(--dark); }
     100% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0); }
 }
 
-/* GALERIA EM GRADE (CLIENTE) */
-.galeria-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-.galeria-grid img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-/* ADMIN CARDS (MODERAÇÃO) */
-.admin-card {
-    background: var(--white);
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.admin-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
-.admin-acoes { display: flex; gap: 10px; }
-.btn-aprovar { background: var(--secondary); color: white; border: none; padding: 10px; border-radius: 5px; flex: 1; font-weight: bold; }
-.btn-excluir { background: #dc3545; color: white; border: none; padding: 10px; border-radius: 5px; flex: 1; font-weight: bold; }
-
 /* FORMULÁRIOS E INPUTS */
 input, textarea, select {
     width: 100%;
@@ -178,31 +169,3 @@ button {
     font-weight: bold;
     cursor: pointer;
 }
-
-/* CUSTOM SWEETALERT - PADRONIZAÇÃO */
-.swal2-popup {
-    border-radius: 20px !important;
-}
-.swal2-styled.swal2-confirm {
-    background-color: var(--primary) !important;
-}
-.swal2-styled.swal2-cancel {
-    background-color: #6e7881 !important;
-}
-
-/* PIX ID HIGHLIGHT */
-.pedido-id-vermelho {
-    display: block;
-    font-size: 32px;
-    color: #dc3545;
-    font-weight: bold;
-    margin: 10px 0;
-    letter-spacing: 5px;
-}
-
-/* ABAS ADMIN */
-.admin-tabs { display: flex; margin-bottom: 20px; gap: 5px; }
-.tab-btn { background: #ddd; color: #555; flex: 1; padding: 10px; font-size: 12px; }
-.tab-btn.active { background: var(--primary); color: white; }
-.admin-section { display: none; }
-.admin-section.active { display: block; }

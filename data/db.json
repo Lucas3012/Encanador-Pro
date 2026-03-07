@@ -1,1 +1,20 @@
-{"sessoes": [], "colaboradores": []}
+{
+  "sessoes": [
+    {
+      "id_visto": "4632",
+      "servico": "Vazamento",
+      "status": "liberado",
+      "data": "2026-03-07T04:20:41.812Z"
+    }
+  ],
+  "colaboradores": [
+    {
+      "id": 1772857321359,
+      "nome": "Lucas Emanuel Tavares ",
+      "telefone": "73981279072",
+      "funcao": "Encanador",
+      "exp": "Total",
+      "aprovado": true
+    }
+  ]
+}
