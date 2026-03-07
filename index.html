@@ -52,27 +52,27 @@
                 <input type="text" id="end" placeholder="Seu Endereço" required>
                 <input type="text" id="serv_display" readonly style="background: #f0f0f0;">
                 <textarea id="msg" placeholder="Detalhes do problema..." rows="3"></textarea>
-                <button type="submit" style="background:#25d366; font-weight: bold; color: white;">SOLICITAR TÉCNICO NO WHATSAPP 💬</button>
+                <button type="submit" style="background:#25d366; color: white; font-weight: bold;">SOLICITAR NO WHATSAPP 💬</button>
             </form>
         </div>
     </div>
 
-    <div id="chat-greeting" onclick="toggleChat()">Olá! 👋 Precisa de ajuda com algum vazamento?</div>
+    <div id="chat-greeting" onclick="toggleChat()">Olá! 👋 Precisa de ajuda ou orçamento?</div>
     <div id="chat-button" onclick="toggleChat()">💬</div>
     <div id="chat-window">
-        <div class="chat-header"><span>Assistente Virtual</span><span onclick="toggleChat()" style="cursor:pointer">×</span></div>
+        <div class="chat-header"><span>Assistente Pro</span><span onclick="toggleChat()" style="cursor:pointer">×</span></div>
         <div class="chat-messages" id="chat-content">
-            <div class="msg-bot">Olá! Como posso ajudar com os seus serviços de encanamento hoje?</div>
+            <div class="msg-bot">Olá! Sou o assistente virtual. Se precisar que um técnico te ligue, basta digitar seu número!</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="user-msg" placeholder="Dúvida...">
+            <input type="text" id="user-msg" placeholder="Sua dúvida ou telefone...">
             <button onclick="enviarDuvida()">></button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://stand-hearts-northwest-airport.trycloudflare.com";
+        const API_BASE = "https://fog-dem-not-charlie.trycloudflare.com";
         const WHATS_GESTOR = "5573988478170";
 
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
@@ -87,7 +87,7 @@
             const idLimpo = Math.floor(1000 + Math.random() * 9000).toString();
             Swal.fire({
                 title: 'Reserva de Atendimento',
-                html: `<p>ID do Pedido: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX" style="margin:15px;"><button onclick="window.open('https://wa.me/${WHATS_GESTOR}?text=Paguei%20ID%20${idLimpo}')" style="background:#25d366;color:white;padding:10px;border:none;width:100%;border-radius:5px;">AVISAR NO WHATSAPP</button>`,
+                html: `<p>ID do Pedido: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><p>Aguarde nesta tela após o pagamento.</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX" style="margin:15px;">`,
                 showConfirmButton: false, allowOutsideClick: false
             });
 
@@ -98,9 +98,10 @@
                     const data = await res.json();
                     if(data.status === 'liberado') { clearInterval(check); Swal.close(); document.getElementById('form-container').style.display='block'; document.getElementById('serv_display').value=servico; }
                 }, 3000);
-            } catch(e) { console.log(e); }
+            } catch(e) {}
         }
 
+        // INTELIGÊNCIA DO CHATBOT
         function toggleChat() {
             const w = document.getElementById('chat-window');
             const g = document.getElementById('chat-greeting');
@@ -114,16 +115,24 @@
             c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
 
-        function enviarDuvida() {
+        async function enviarDuvida() {
             const i = document.getElementById('user-msg');
-            const m = i.value.toLowerCase();
+            const m = i.value.toLowerCase().trim();
             if(!m) return;
             adicionarMsg(i.value, 'msg-user'); i.value = '';
-            setTimeout(() => {
-                let r = "Para orçamentos, fale conosco no WhatsApp!";
-                if(m.includes('valor')) r = "Nossa taxa de visita é fixa. O serviço é orçado no local.";
+
+            setTimeout(async () => {
+                let r = "Para orçamentos urgentes, use os botões da página inicial!";
+                
+                // Detecta se é um telefone
+                if (m.length >= 8 && !isNaN(m.replace(/\D/g,''))) {
+                    r = "Recebi seu número! ✅ O técnico entrará em contato em instantes.";
+                    await fetch(`${API_BASE}/api/contato-chatbot`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telefone: m }) });
+                } else if(m.includes('valor') || m.includes('preço')) {
+                    r = "A taxa de visita é fixa para Itabuna. O serviço completo é avaliado na hora. Deixe seu WhatsApp para agendar!";
+                }
                 adicionarMsg(r, 'msg-bot');
-            }, 8000);
+            }, 1000);
         }
 
         async function carregarTecnicos() {
