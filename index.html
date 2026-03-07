@@ -6,15 +6,12 @@
     <title>Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .pix-code { color: #00f2ff; text-shadow: 0 0 5px #00f2ff; font-family: monospace; background: #111; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 11px; display: block; margin: 10px 0; border: 1px solid #00f2ff; }
-        #form-container { display: none; margin-top: 20px; border: 2px solid #28a745; padding: 15px; border-radius: 10px; }
-    </style>
 </head>
 <body>
+
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span>Encanador Pro</span>
+        <span style="font-weight: bold;">Encanador Pro</span>
     </div>
 
     <div id="mySidebar" class="sidebar">
@@ -28,43 +25,74 @@
 
     <div class="container">
         <h1>🛠️ Serviços</h1>
+        <p style="text-align: center; color: #666;">Selecione uma categoria abaixo:</p>
+        
         <div class="servicos-destaque">
-            <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
-            <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
-            <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Desentupimento</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Vazamento')">
+                <div class="icone-bola">💧</div>
+                <span>Vazamento</span>
+            </div>
+            <div class="circulo-servico" onclick="abrirPix('Reparo')">
+                <div class="icone-bola">🛠️</div>
+                <span>Reparo</span>
+            </div>
+            <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
+                <div class="icone-bola">🚽</div>
+                <span>Desentupimento</span>
+            </div>
         </div>
 
         <div id="form-container">
             <form id="formOrcamento">
-                <h2 style="color:#28a745">✅ Liberado!</h2>
+                <h3 style="color: #28a745; text-align: center;">✅ Formulário Liberado</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="endereco" placeholder="Endereço Completo" required>
+                <input type="text" id="endereco" placeholder="Seu Endereço" required>
                 <input type="text" id="servico_display" readonly>
-                <textarea id="mensagem" placeholder="Detalhes..."></textarea>
-                <button type="submit">Finalizar Pedido</button>
+                <textarea id="mensagem" placeholder="Descreva o problema aqui..." rows="4"></textarea>
+                <button type="submit">Solicitar Atendimento</button>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://pleasant-sox-smell-sends.trycloudflare.com";
+        const API_BASE = "https://colleagues-louise-hazards-bobby.trycloudflare.com";
         let idSessao = "";
 
-        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
 
         async function abrirPix(servico) {
             const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
+            
             Swal.fire({
                 title: 'Pagamento de Reserva',
-                html: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}"><br><span class="pix-code">${pix}</span><input id="swal-input" class="swal2-input" placeholder="Cód. Comprovante">`,
-                confirmButtonText: 'Validar',
+                html: `
+                    <p>Pague a taxa para liberar o formulário:</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px;">
+                    <span class="pix-code">${pix}</span>
+                    <input id="swal-input" class="swal2-input" placeholder="Cole o código do comprovante">
+                `,
+                confirmButtonText: 'Validar Pix',
                 preConfirm: () => document.getElementById('swal-input').value
             }).then(async (r) => {
                 if(r.isConfirmed && r.value) {
-                    const res = await fetch(`${API_BASE}/api/verificar-pix`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({codigo:r.value, servico}) });
+                    const res = await fetch(`${API_BASE}/api/verificar-pix`, { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({codigo: r.value, servico}) 
+                    });
                     const d = await res.json();
                     idSessao = d.id;
-                    Swal.fire({ title:'Validando...', text:'Aguarde a liberação do Admin.', allowOutsideClick:false, didOpen:()=>Swal.showLoading() });
+                    
+                    Swal.fire({ 
+                        title: 'Aguardando Aprovação', 
+                        text: 'O administrador está validando seu pagamento.', 
+                        allowOutsideClick: false, 
+                        didOpen: () => Swal.showLoading() 
+                    });
+                    
                     checarStatus(servico);
                 }
             });
@@ -77,18 +105,28 @@
                 if(d.status === 'liberado') {
                     clearInterval(intv);
                     Swal.close();
-                    document.getElementById('form-container').style.display='block';
+                    document.getElementById('form-container').style.display = 'block';
                     document.getElementById('servico_display').value = servico;
+                    document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
                 }
             }, 3000);
         }
 
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = { id_sessao: idSessao, nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, mensagem: document.getElementById('mensagem').value };
-            await fetch(`${API_BASE}/orcamento`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dados) });
-            alert("Sucesso! Aguarde contato.");
-            location.reload();
+            const dados = { 
+                id_sessao: idSessao, 
+                nome: document.getElementById('nome').value, 
+                endereco: document.getElementById('endereco').value, 
+                mensagem: document.getElementById('mensagem').value 
+            };
+            await fetch(`${API_BASE}/orcamento`, { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(dados) 
+            });
+            Swal.fire('Sucesso!', 'Pedido enviado com sucesso.', 'success');
+            setTimeout(() => location.reload(), 2000);
         };
     </script>
 </body>
