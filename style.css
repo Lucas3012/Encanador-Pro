@@ -323,3 +323,60 @@ nav, .navbar {
     border: 2px solid var(--primary);
     z-index: 1; /* Garante que o menu passe por cima */
 }
+/* CONTAINER DOS CARDS SOBRE O MAPA */
+#colaboradores-no-mapa {
+    position: relative;
+    margin-top: -50px; /* Faz sobrepor levemente o mapa */
+    z-index: 5;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* CARD DO PROFISSIONAL */
+.card-tecnico {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border-left: 5px solid var(--primary);
+    animation: slideIn 0.5s ease;
+}
+
+.tecnico-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.tecnico-texto b {
+    display: block;
+    font-size: 14px;
+    color: #333;
+}
+
+.tecnico-texto span {
+    font-size: 12px;
+    color: #666;
+}
+
+.btn-whats-tecnico {
+    color: #25d366;
+    font-size: 24px;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.btn-whats-tecnico:hover {
+    transform: scale(1.2);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

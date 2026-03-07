@@ -11,5 +11,14 @@
       "status": "liberado"
     }
   ],
-  "colaboradores": []
+  "colaboradores": [
+    {
+      "id": 1772851722703,
+      "nome": "Lucas Emanuel Tavares dos Santos ",
+      "telefone": "73981279072",
+      "funcao": "Encanador",
+      "exp": "Geral",
+      "aprovado": true
+    }
+  ]
 }
