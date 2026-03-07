@@ -10,7 +10,7 @@
 <body>
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <b>Painel Administrativo</b>
+        <b>Painel Mestre</b>
     </div>
 
     <div id="mySidebar" class="sidebar">
@@ -21,10 +21,10 @@
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
-    <div id="login-screen" class="container" style="margin-top: 50px;">
-        <h2 style="text-align:center; margin-bottom:20px;">🔒 Acesso Restrito</h2>
-        <input type="password" id="admin-pass" placeholder="Senha do Mestre" style="text-align:center;">
-        <button onclick="fazerLogin()">ENTRAR NO PAINEL</button>
+    <div id="login-screen" class="container" style="margin-top:50px;">
+        <h2 style="text-align:center;">Login Administrativo</h2>
+        <input type="password" id="admin-pass" placeholder="Senha" style="text-align:center;">
+        <button onclick="fazerLogin()">ENTRAR</button>
     </div>
 
     <div id="panel-content" style="display:none">
@@ -36,22 +36,14 @@
 
         <div id="tab-pix" class="admin-section active container">
             <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3 style="margin-bottom:15px; font-size:16px;">Liberar Formulário do Cliente</h3>
-                <p style="font-size:12px; color:#666; margin-bottom:10px;">Digite o código de 4 dígitos informado pelo cliente:</p>
-                <input type="number" id="input-id" placeholder="Ex: 1234" style="font-size:24px; text-align:center; font-weight:bold; letter-spacing:5px;">
-                <button onclick="validarID()" style="background:#28a745;">CONFIRMAR PAGAMENTO ✅</button>
+                <h3>Liberar ID do Cliente</h3>
+                <input type="number" id="input-id" placeholder="Código de 4 dígitos" style="font-size:24px; text-align:center; margin: 15px 0;">
+                <button onclick="validarID()" style="background:#28a745;">LIBERAR AGORA ✅</button>
             </div>
         </div>
 
-        <div id="tab-galeria" class="admin-section container">
-            <h3 style="margin-bottom:15px;">Fotos para Aprovação</h3>
-            <div id="lista-pendentes"></div>
-        </div>
-
-        <div id="tab-colab" class="admin-section container">
-            <h3 style="margin-bottom:15px;">Gestão de Profissionais</h3>
-            <div id="lista-colabs"></div>
-        </div>
+        <div id="tab-galeria" class="admin-section container"><div id="lista-pendentes"></div></div>
+        <div id="tab-colab" class="admin-section container"><div id="lista-colabs"></div></div>
     </div>
 
     <script>
@@ -63,14 +55,11 @@
         }
 
         function fazerLogin() {
-            const pass = document.getElementById('admin-pass').value;
-            if(pass === '1234') { // Troque '1234' pela sua senha real
-                Swal.fire({ icon: 'success', title: 'Bem-vindo, Mestre!', timer: 1500, showConfirmButton: false });
+            if(document.getElementById('admin-pass').value === '1234') {
+                Swal.fire({ icon: 'success', title: 'Acesso Liberado', timer: 1000, showConfirmButton: false });
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('panel-content').style.display = 'block';
-            } else {
-                Swal.fire('Erro', 'Senha incorreta!', 'error');
-            }
+            } else { Swal.fire('Erro', 'Senha incorreta', 'error'); }
         }
 
         function mudarAba(id, btn) {
@@ -84,9 +73,9 @@
 
         async function validarID() {
             const idInput = document.getElementById('input-id').value;
-            if(!idInput) return Swal.fire('Atenção', 'Digite o ID do pedido!', 'warning');
+            if(!idInput) return Swal.fire('Aviso', 'Digite o ID!', 'warning');
 
-            Swal.fire({ title: 'Processando...', didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Buscando ID...', didOpen: () => Swal.showLoading() });
 
             try {
                 const res = await fetch(`${API}/api/admin/liberar-por-id`, { 
@@ -96,61 +85,43 @@
                 });
 
                 if(res.ok) {
-                    Swal.fire('Sucesso!', `Cliente #${idInput} liberado com sucesso.`, 'success');
+                    Swal.fire('Sucesso!', `ID #${idInput} liberado no db.json!`, 'success');
                     document.getElementById('input-id').value = "";
                 } else {
-                    Swal.fire('Ops!', 'Este código não foi encontrado no banco.', 'error');
+                    Swal.fire('Não encontrado', 'Este ID não existe ou já expirou.', 'error');
                 }
-            } catch (e) {
-                Swal.fire('Erro', 'O servidor no Termux está offline.', 'error');
-            }
+            } catch (e) { Swal.fire('Erro', 'Servidor Offline', 'error'); }
         }
 
         async function carregarPendentes() {
             const res = await fetch(`${API}/api/admin/pendentes`);
             const fotos = await res.json();
-            const container = document.getElementById('lista-pendentes');
-            if(fotos.length === 0) return container.innerHTML = "<p>Nenhuma foto pendente.</p>";
-            
-            container.innerHTML = fotos.map(f => `
+            document.getElementById('lista-pendentes').innerHTML = fotos.map(f => `
                 <div class="admin-card">
-                    <img src="${API}/temp/${f}" style="width:100%; border-radius:8px;">
-                    <div class="admin-acoes" style="display:flex; gap:5px; margin-top:10px;">
-                        <button onclick="decidirFoto('${f}','aprovar')" style="background:green">✓</button>
-                        <button onclick="decidirFoto('${f}','deletar')" style="background:red">✕</button>
-                    </div>
+                    <img src="${API}/temp/${f}" style="width:100%">
+                    <button onclick="decidirFoto('${f}','aprovar')" style="background:green">APROVAR</button>
+                    <button onclick="decidirFoto('${f}','deletar')" style="background:red">REJEITAR</button>
                 </div>`).join('');
         }
 
         async function decidirFoto(foto, acao) {
-            await fetch(`${API}/api/admin/decidir-foto`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ foto, acao }) 
-            });
+            await fetch(`${API}/api/admin/decidir-foto`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ foto, acao }) });
             carregarPendentes();
         }
 
         async function carregarColabs() {
             const res = await fetch(`${API}/api/admin/colaboradores`);
             const colabs = await res.json();
-            const container = document.getElementById('lista-colabs');
-            container.innerHTML = colabs.map(c => `
-                <div class="admin-card" style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px;">
+            document.getElementById('lista-colabs').innerHTML = colabs.map(c => `
+                <div class="admin-card">
                     <b>${c.nome}</b> (${c.funcao})
-                    <div style="margin-top:5px;">
-                        ${!c.aprovado ? `<button onclick="decidirColab('${c.id}','aprovar')" style="font-size:10px; background:blue;">APROVAR NO MAPA</button>` : '<span style="color:green; font-size:12px;">✓ Já está no mapa</span>'}
-                        <button onclick="decidirColab('${c.id}','deletar')" style="font-size:10px; background:red;">REMOVER</button>
-                    </div>
+                    ${!c.aprovado ? `<button onclick="decidirColab('${c.id}','aprovar')">APROVAR NO MAPA</button>` : '<span>✓ Ativo</span>'}
+                    <button onclick="decidirColab('${c.id}','deletar')" style="background:red">REMOVER</button>
                 </div>`).join('');
         }
 
         async function decidirColab(id, acao) {
-            await fetch(`${API}/api/admin/decidir-colaborador`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ id, acao }) 
-            });
+            await fetch(`${API}/api/admin/decidir-colaborador`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, acao }) });
             carregarColabs();
         }
     </script>
