@@ -6,124 +6,113 @@
     <title>Painel Admin - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .admin-tab { display: none; padding: 15px; }
+        .active-tab { display: block; }
+        .tab-menu { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding: 10px 0; }
+        .tab-btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; background: #eee; font-weight: bold; }
+        .tab-btn.active { background: #007bff; color: white; }
+        
+        .lead-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid #25d366; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lead-info b { font-size: 16px; display: block; }
+        .lead-info span { font-size: 11px; color: #888; }
+        .btn-call { background: #25d366; color: white; padding: 8px 12px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px; }
+        .btn-danger { background: #dc3545; color: white; margin-top: 30px; border-radius: 8px; padding: 12px; font-size: 12px; font-weight: bold; }
+    </style>
 </head>
-<body>
+<body style="background: #f8f9fa;">
+
     <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <b>Painel Mestre</b>
+        <h1 class="logo-centralizado">PAINEL CONTROLE</h1>
     </div>
 
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
-        <a href="index.html">🏠 Início</a>
-        <a href="historico.html">📋 Histórico</a>
-        <a href="galeria.html">📸 Galeria</a>
-        <a href="admin.html">🔐 Painel Admin</a>
-    </div>
-
-    <div id="login-screen" class="container" style="margin-top:50px;">
-        <h2 style="text-align:center;">Login Administrativo</h2>
-        <input type="password" id="admin-pass" placeholder="Senha" style="text-align:center;">
-        <button onclick="fazerLogin()">ENTRAR</button>
-    </div>
-
-    <div id="panel-content" style="display:none">
-        <div class="admin-tabs">
-            <button class="tab-btn active" onclick="mudarAba('tab-pix', this)">💰 Liberar PIX</button>
-            <button class="tab-btn" onclick="mudarAba('tab-galeria', this)">📸 Galeria</button>
-            <button class="tab-btn" onclick="mudarAba('tab-colab', this)">👷 Técnicos</button>
+    <div class="container" style="max-width: 550px;">
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="openTab('liberacao')">🔑 Liberação</button>
+            <button class="tab-btn" onclick="openTab('leads')">📱 Leads</button>
+            <button class="tab-btn" onclick="openTab('config')">⚙️ Ajustes</button>
         </div>
 
-        <div id="tab-pix" class="admin-section active container">
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <h3>Liberar ID do Cliente</h3>
-                <input type="number" id="input-id" placeholder="Código de 4 dígitos" style="font-size:24px; text-align:center; margin: 15px 0;">
-                <button onclick="validarID()" style="background:#28a745;">LIBERAR AGORA ✅</button>
-            </div>
+        <div id="liberacao" class="admin-tab active-tab">
+            <h3>Liberar ID do Pix</h3>
+            <input type="number" id="input-id" placeholder="Digite o ID (ex: 1234)" style="font-size: 20px; text-align: center; margin-top: 15px;">
+            <button onclick="validarID()" style="background: #28a745; font-size: 18px; font-weight: bold;">LIBERAR ACESSO ✅</button>
         </div>
 
-        <div id="tab-galeria" class="admin-section container"><div id="lista-pendentes"></div></div>
-        <div id="tab-colab" class="admin-section container"><div id="lista-colabs"></div></div>
+        <div id="leads" class="admin-tab">
+            <h3>Contatos do Chatbot</h3>
+            <div id="lista-leads" style="margin-top: 15px;"></div>
+            <button class="btn-danger" onclick="limparLeads()">🗑️ APAGAR TODOS OS LEADS</button>
+        </div>
+
+        <div id="config" class="admin-tab">
+            <h3>Manutenção do Sistema</h3>
+            <p style="font-size: 13px; color: #666; margin: 15px 0;">Use estes botões para limpar o banco de dados no final do dia.</p>
+            <button class="btn-danger" onclick="limparSessoes()" style="width: 100%;">🗑️ RESETAR TODOS OS IDs (SESSOES)</button>
+            <p style="font-size: 11px; color: red; margin-top: 5px;">*Isso impedirá que IDs antigos sejam usados.</p>
+        </div>
     </div>
 
     <script>
         const API = "http://localhost:3000";
 
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
-
-        function fazerLogin() {
-            if(document.getElementById('admin-pass').value === '1234') {
-                Swal.fire({ icon: 'success', title: 'Acesso Liberado', timer: 1000, showConfirmButton: false });
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('panel-content').style.display = 'block';
-            } else { Swal.fire('Erro', 'Senha incorreta', 'error'); }
-        }
-
-        function mudarAba(id, btn) {
-            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        function openTab(name) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active-tab'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); 
-            btn.classList.add('active');
-            if(id === 'tab-galeria') carregarPendentes();
-            if(id === 'tab-colab') carregarColabs();
+            document.getElementById(name).classList.add('active-tab');
+            event.currentTarget.classList.add('active');
+            if(name === 'leads') carregarLeads();
         }
 
         async function validarID() {
-            const idInput = document.getElementById('input-id').value;
-            if(!idInput) return Swal.fire('Aviso', 'Digite o ID!', 'warning');
-
-            Swal.fire({ title: 'Buscando ID...', didOpen: () => Swal.showLoading() });
-
-            try {
-                const res = await fetch(`${API}/api/admin/liberar-por-id`, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ id_visto: idInput }) 
-                });
-
-                if(res.ok) {
-                    Swal.fire('Sucesso!', `ID #${idInput} liberado no db.json!`, 'success');
-                    document.getElementById('input-id').value = "";
-                } else {
-                    Swal.fire('Não encontrado', 'Este ID não existe ou já expirou.', 'error');
-                }
-            } catch (e) { Swal.fire('Erro', 'Servidor Offline', 'error'); }
+            const id = document.getElementById('input-id').value;
+            if(!id) return;
+            const res = await fetch(`${API}/api/admin/liberar-por-id`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id_visto: id })
+            });
+            if(res.ok) {
+                Swal.fire('Sucesso', `ID ${id} liberado!`, 'success');
+                document.getElementById('input-id').value = '';
+            } else {
+                Swal.fire('Erro', 'ID não encontrado.', 'error');
+            }
         }
 
-        async function carregarPendentes() {
-            const res = await fetch(`${API}/api/admin/pendentes`);
-            const fotos = await res.json();
-            document.getElementById('lista-pendentes').innerHTML = fotos.map(f => `
-                <div class="admin-card">
-                    <img src="${API}/temp/${f}" style="width:100%">
-                    <button onclick="decidirFoto('${f}','aprovar')" style="background:green">APROVAR</button>
-                    <button onclick="decidirFoto('${f}','deletar')" style="background:red">REJEITAR</button>
-                </div>`).join('');
+        async function carregarLeads() {
+            const container = document.getElementById('lista-leads');
+            const res = await fetch(`${API}/api/admin/contatos`);
+            const leads = await res.json();
+            if(leads.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:#999;'>Nenhum lead encontrado.</p>";
+                return;
+            }
+            container.innerHTML = leads.reverse().map(l => `
+                <div class="lead-card">
+                    <div class="lead-info"><b>${l.telefone}</b><span>📅 ${l.data}</span></div>
+                    <a href="https://wa.me/55${l.telefone.replace(/\D/g,'')}" class="btn-call">WHATS</a>
+                </div>
+            `).join('');
         }
 
-        async function decidirFoto(foto, acao) {
-            await fetch(`${API}/api/admin/decidir-foto`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ foto, acao }) });
-            carregarPendentes();
+        async function limparLeads() {
+            const result = await Swal.fire({ title: 'Apagar tudo?', text: "Você perderá todos os telefones!", icon: 'warning', showCancelButton: true });
+            if(result.isConfirmed) {
+                await fetch(`${API}/api/admin/limpar-leads`, { method: 'POST' });
+                carregarLeads();
+                Swal.fire('Apagado!', '', 'success');
+            }
         }
 
-        async function carregarColabs() {
-            const res = await fetch(`${API}/api/admin/colaboradores`);
-            const colabs = await res.json();
-            document.getElementById('lista-colabs').innerHTML = colabs.map(c => `
-                <div class="admin-card">
-                    <b>${c.nome}</b> (${c.funcao})
-                    ${!c.aprovado ? `<button onclick="decidirColab('${c.id}','aprovar')">APROVAR NO MAPA</button>` : '<span>✓ Ativo</span>'}
-                    <button onclick="decidirColab('${c.id}','deletar')" style="background:red">REMOVER</button>
-                </div>`).join('');
-        }
-
-        async function decidirColab(id, acao) {
-            await fetch(`${API}/api/admin/decidir-colaborador`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, acao }) });
-            carregarColabs();
+        async function limparSessoes() {
+            const result = await Swal.fire({ title: 'Resetar IDs?', text: "Todos os clientes terão que gerar novos IDs.", icon: 'warning', showCancelButton: true });
+            if(result.isConfirmed) {
+                await fetch(`${API}/api/admin/limpar-sessoes`, { method: 'POST' });
+                Swal.fire('Sistema Resetado!', '', 'success');
+            }
         }
     </script>
 </body>
 </html>
+
