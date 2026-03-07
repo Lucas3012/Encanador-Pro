@@ -3,58 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Encanador Pro</title>
+    <title>Painel Gestor</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header"><span>Painel Admin</span></div>
+    <div class="header">Painel Administrativo</div>
 
-    <div class="container" id="login">
-        <h1>🔐 Login</h1>
+    <div id="login-container" class="container">
+        <h2>Acesso Restrito</h2>
         <input type="text" id="user" placeholder="Usuário">
         <input type="password" id="pass" placeholder="Senha">
-        <button onclick="logar()">Acessar</button>
+        <button onclick="logar()">Entrar</button>
     </div>
 
-    <div class="container" id="painel" style="display:none;">
-        <h2>Pedidos e Pix</h2>
-        <table id="tabela"></table>
+    <div id="painel" style="display:none;">
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="mudarAba('aba-pedidos', this)">📋 Pedidos</button>
+            <button class="tab-btn" onclick="mudarAba('aba-galeria', this)">📸 Galeria</button>
+            <button class="tab-btn" onclick="mudarAba('aba-colabs', this)">👷 Colabs</button>
+        </div>
+
+        <div id="aba-pedidos" class="container" style="display:block;">
+            <h2>Validação de PIX</h2>
+            <div id="lista-pedidos">Carregando...</div>
+        </div>
+
+        <div id="aba-galeria" class="container" style="display:none;">
+            <h2>Fotos Pendentes</h2>
+            <div id="lista-fotos" class="grid"></div>
+        </div>
+
+        <div id="aba-colabs" class="container" style="display:none;">
+            <h2>Novos Candidatos</h2>
+            <div id="lista-colabs"></div>
+        </div>
     </div>
 
     <script>
-        const API_BASE = "https://toolbar-bodies-isolation-gorgeous.trycloudflare.com";
-        async function logar() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            const res = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
-            if(res.ok) { document.getElementById('login').style.display='none'; document.getElementById('painel').style.display='block'; atualizar(); }
+        const API = "http://localhost:3000";
+        let creds = { user: "", pass: "" };
+
+        function mudarAba(id, btn) {
+            document.querySelectorAll('.container').forEach(c => { if(c.id !== 'login-container') c.style.display = 'none'; });
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).style.display = 'block';
+            btn.classList.add('active');
+            atualizarTudo();
         }
 
-        async function atualizar() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            const res = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
-            const pedidos = await res.json();
+        async function logar() {
+            creds.user = document.getElementById('user').value;
+            creds.pass = document.getElementById('pass').value;
+            const res = await fetch(`${API}/admin/pedidos?user=${creds.user}&pass=${creds.pass}`);
+            if(res.ok) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('painel').style.display = 'block';
+                atualizarTudo();
+            } else { alert("Senha incorreta!"); }
+        }
+
+        async function atualizarTudo() {
+            const params = `?user=${creds.user}&pass=${creds.pass}`;
             
-            document.getElementById('tabela').innerHTML = `<tr><th>Data</th><th>Status/Nome</th><th>Ação</th></tr>` + 
-            pedidos.reverse().map(pd => `
-                <tr style="${pd.status === 'pendente' ? 'background:#fff3cd' : ''}">
-                    <td>${pd.data}</td>
-                    <td>${pd.status === 'pendente' ? '🚨 AGUARDANDO PIX' : pd.nome}</td>
-                    <td>
-                        ${pd.status === 'pendente' ? 
-                        `<button onclick="liberar('${pd.id}')" style="background:blue;color:white;border-radius:5px;">Validar Pix</button>` : 
-                        `<a href="https://wa.me/5573988478170">WhatsApp</a>`}
-                    </td>
-                </tr>
+            // Pedidos
+            const p = await (await fetch(`${API}/admin/pedidos${params}`)).json();
+            document.getElementById('lista-pedidos').innerHTML = `<table>` + p.map(x => `
+                <tr><td>${x.data}<br><strong>${x.nome}</strong></td><td><button onclick="liberar('${x.id}')">LIBERAR</button></td></tr>
+            `).join('') + `</table>`;
+
+            // Galeria
+            const g = await (await fetch(`${API}/api/admin/pendentes${params}`)).json();
+            document.getElementById('lista-fotos').innerHTML = g.map(f => `
+                <div class="card"><img src="${API}/temp_galeria/${f}">
+                <button onclick="decidir('${f}','aprovar')" style="background:green">✅</button>
+                <button onclick="decidir('${f}','reprovar')" style="background:red">❌</button></div>
+            `).join('');
+
+            // Colaboradores
+            const c = await (await fetch(`${API}/api/admin/colaboradores${params}`)).json();
+            document.getElementById('lista-colabs').innerHTML = c.map(colab => `
+                <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">
+                    <strong>${colab.nome}</strong> (${colab.especialidade})<br>
+                    <a href="https://wa.me/55${colab.telefone}">Chamar no WhatsApp</a>
+                </div>
             `).join('');
         }
 
-        async function liberar(id) {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/api/admin/liberar`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user, pass, id}) });
-            atualizar();
+        async function decidir(foto, acao) {
+            await fetch(`${API}/api/admin/decidir`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({...creds, foto, acao})
+            });
+            atualizarTudo();
         }
     </script>
 </body>

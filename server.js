@@ -7,80 +7,82 @@ const multer = require('multer');
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
-app.use('/galeria', express.static(path.join(__dirname, 'galeria')));
-app.use('/temp_galeria', express.static(path.join(__dirname, 'temp_galeria')));
+app.use('/uploads', express.static('uploads'));
+app.use('/temp_galeria', express.static('temp_galeria'));
 
-const ADMIN_USER = "admin"; 
-const ADMIN_PASS = "1234";  
-const DATA_DIR = path.join(__dirname, 'data');
-const DB_PATH = path.join(DATA_DIR, 'db.json');
+// Configuração de Pastas
+const folders = ['uploads', 'temp_galeria', 'data'];
+folders.forEach(f => { if (!fs.existsSync(f)) fs.mkdirSync(f); });
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ pedidos: [] }));
+const DB_PEDIDOS = './data/pedidos.json';
+const DB_COLABS = './data/colaboradores.json';
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "1234";
 
-const upload = multer({ dest: path.join(__dirname, 'temp_galeria/') });
+// Configuração Multer (Upload de Fotos)
+const storage = multer.diskStorage({
+    destination: 'temp_galeria/',
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
-// --- ROTAS PIX & STATUS ---
+// --- ROTAS CLIENTE ---
 
-app.post('/api/verificar-pix', (req, res) => {
-    const { codigo, servico } = req.body;
-    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    const novoId = Date.now().toString();
-    
-    db.pedidos.push({
-        id: novoId,
-        data: new Date().toLocaleString('pt-BR'),
-        nome: "Aguardando Pix...",
-        servico: servico,
-        codigo_pix: codigo,
-        status: "pendente"
-    });
-    
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ id: novoId });
+// Salvar Pedido/Pix
+app.post('/api/pedido', (req, res) => {
+    let pedidos = fs.existsSync(DB_PEDIDOS) ? JSON.parse(fs.readFileSync(DB_PEDIDOS)) : [];
+    const novo = { id: Date.now().toString(), data: new Date().toLocaleString(), status: 'pendente', ...req.body };
+    pedidos.push(novo);
+    fs.writeFileSync(DB_PEDIDOS, JSON.stringify(pedidos, null, 2));
+    res.json({ success: true, id: novo.id });
 });
 
-app.get('/api/status/:id', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    const pedido = db.pedidos.find(p => p.id === req.params.id);
-    res.json({ status: pedido ? pedido.status : 'nao_encontrado' });
+// Enviar Foto para Galeria (Pendente)
+app.post('/api/upload-galeria', upload.single('foto'), (req, res) => {
+    res.json({ success: true, file: req.file.filename });
 });
 
-app.post('/api/admin/liberar', (req, res) => {
-    const { user, pass, id } = req.body;
-    if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).send("Negado");
-    
-    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    const idx = db.pedidos.findIndex(p => p.id === id);
-    if (idx !== -1) {
-        db.pedidos[idx].status = "liberado";
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-        res.json({ message: "Liberado" });
-    } else { res.status(404).send("Erro"); }
+// Trabalhe Conosco
+app.post('/api/colaborador', (req, res) => {
+    let colabs = fs.existsSync(DB_COLABS) ? JSON.parse(fs.readFileSync(DB_COLABS)) : [];
+    colabs.push({ id: Date.now(), data: new Date().toLocaleDateString(), ...req.body });
+    fs.writeFileSync(DB_COLABS, JSON.stringify(colabs, null, 2));
+    res.json({ success: true });
 });
 
-// --- ROTAS GERAIS ---
-
-app.post('/orcamento', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    const idx = db.pedidos.findIndex(p => p.id === req.body.id_sessao);
-    
-    if (idx !== -1) {
-        db.pedidos[idx].nome = req.body.nome;
-        db.pedidos[idx].endereco = req.body.endereco;
-        db.pedidos[idx].mensagem = req.body.mensagem;
-        db.pedidos[idx].status = "concluido";
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-        res.json({ message: "OK" });
-    } else { res.status(400).send("Sessão inválida"); }
+// Listar Fotos Aprovadas
+app.get('/api/galeria', (req, res) => {
+    const files = fs.readdirSync('uploads');
+    res.json(files);
 });
+
+// --- ROTAS ADMIN (Protegidas) ---
+
+const checkAdmin = (req) => (req.query.user === ADMIN_USER || req.body.user === ADMIN_USER) && (req.query.pass === ADMIN_PASS || req.body.pass === ADMIN_PASS);
 
 app.get('/admin/pedidos', (req, res) => {
-    const { user, pass } = req.query;
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        res.json(JSON.parse(fs.readFileSync(DB_PATH, 'utf8')).pedidos);
-    } else { res.status(401).send("Negado"); }
+    if (!checkAdmin(req)) return res.status(401).send("Erro");
+    const pedidos = fs.existsSync(DB_PEDIDOS) ? JSON.parse(fs.readFileSync(DB_PEDIDOS)) : [];
+    res.json(pedidos);
 });
 
-app.listen(3000, () => console.log('🚀 Servidor Rodando na Porta 3000'));
+app.get('/api/admin/pendentes', (req, res) => {
+    if (!checkAdmin(req)) return res.status(401).send("Erro");
+    res.json(fs.readdirSync('temp_galeria'));
+});
+
+app.post('/api/admin/decidir', (req, res) => {
+    if (!checkAdmin(req)) return res.status(401).send("Erro");
+    const { foto, acao } = req.body;
+    if (acao === 'aprovar') fs.renameSync(`temp_galeria/${foto}`, `uploads/${foto}`);
+    else fs.unlinkSync(`temp_galeria/${foto}`);
+    res.json({ success: true });
+});
+
+app.get('/api/admin/colaboradores', (req, res) => {
+    if (!checkAdmin(req)) return res.status(401).send("Erro");
+    const colabs = fs.existsSync(DB_COLABS) ? JSON.parse(fs.readFileSync(DB_COLABS)) : [];
+    res.json(colabs);
+});
+
+app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
