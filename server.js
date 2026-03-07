@@ -8,21 +8,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// DIRETÓRIOS E CAMINHOS
+// CONFIGURAÇÃO DE DIRETÓRIOS
 const DATA_DIR = path.join(__dirname, 'data');
 const UPLOADS = path.join(__dirname, 'uploads');
 const TEMP = path.join(__dirname, 'temp_galeria');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
 const CONTATOS_PATH = path.join(DATA_DIR, 'contatos.json');
 
-// Garantir que as pastas existam
 [DATA_DIR, UPLOADS, TEMP].forEach(f => { if (!fs.existsSync(f)) fs.mkdirSync(f); });
 
-// Inicializar arquivos JSON
 if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ sessoes: [], colaboradores: [] }, null, 2));
 if (!fs.existsSync(CONTATOS_PATH)) fs.writeFileSync(CONTATOS_PATH, JSON.stringify([], null, 2));
 
-// Multer Config
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, TEMP),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
@@ -30,11 +27,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use('/fotos', express.static(UPLOADS));
+app.use('/temp', express.static(TEMP));
 
 const limparID = (id) => String(id).replace('#', '').trim();
 
 // ==========================================
-//           ROTAS DE DADOS E LEADS
+//           ROTAS PÚBLICAS (CLIENTE)
 // ==========================================
 
 app.post('/api/registrar-id', (req, res) => {
@@ -57,15 +55,27 @@ app.post('/api/contato-chatbot', (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/api/galeria', (req, res) => res.json(fs.readdirSync(UPLOADS)));
+
 app.get('/api/aprovados', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     res.json(db.colaboradores.filter(c => c.aprovado));
+});
+
+app.post('/api/upload-galeria', upload.single('foto'), (req, res) => res.json({ success: true }));
+
+app.post('/api/colaborador', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    db.colaboradores.push({ id: Date.now(), ...req.body, aprovado: false });
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ success: true });
 });
 
 // ==========================================
 //           ROTAS ADMINISTRATIVAS
 // ==========================================
 
+// Leads e IDs
 app.get('/api/admin/contatos', (req, res) => res.json(JSON.parse(fs.readFileSync(CONTATOS_PATH))));
 
 app.post('/api/admin/liberar-por-id', (req, res) => {
@@ -76,10 +86,47 @@ app.post('/api/admin/liberar-por-id', (req, res) => {
         db.sessoes[i].status = "liberado";
         fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
         res.json({ success: true });
-    } else res.status(404).json({ error: "ID não encontrado" });
+    } else res.status(404).json({ error: "Erro" });
 });
 
-// ROTAS DE LIMPEZA (RESSETAR SISTEMA)
+// Gestão de Técnicos
+app.get('/api/admin/listar-colabs', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    res.json(db.colaboradores);
+});
+
+app.post('/api/admin/aprovar-colab', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    const i = db.colaboradores.findIndex(c => c.id == req.body.id);
+    if(i !== -1) db.colaboradores[i].aprovado = true;
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ success: true });
+});
+
+app.post('/api/admin/excluir-colab', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    db.colaboradores = db.colaboradores.filter(c => c.id != req.body.id);
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ success: true });
+});
+
+// Gestão de Fotos
+app.get('/api/admin/temp-fotos', (req, res) => res.json(fs.readdirSync(TEMP)));
+
+app.post('/api/admin/aprovar-foto', (req, res) => {
+    const foto = req.body.nome;
+    fs.renameSync(path.join(TEMP, foto), path.join(UPLOADS, foto));
+    res.json({ success: true });
+});
+
+app.post('/api/admin/excluir-foto', (req, res) => {
+    const { nome, pasta } = req.body;
+    const alvo = pasta === 'temp' ? TEMP : UPLOADS;
+    if (fs.existsSync(path.join(alvo, nome))) fs.unlinkSync(path.join(alvo, nome));
+    res.json({ success: true });
+});
+
+// Limpezas
 app.post('/api/admin/limpar-sessoes', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     db.sessoes = [];
@@ -92,4 +139,4 @@ app.post('/api/admin/limpar-leads', (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(3000, () => console.log("🚀 Servidor Rodando na Porta 3000"));
+app.listen(3000, () => console.log("🚀 Servidor Full Power na Porta 3000"));

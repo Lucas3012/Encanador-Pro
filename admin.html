@@ -3,53 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Encanador Pro</title>
+    <title>Admin - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .admin-tab { display: none; padding: 15px; }
         .active-tab { display: block; }
-        .tab-menu { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding: 10px 0; }
-        .tab-btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; background: #eee; font-weight: bold; }
+        .tab-menu { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding: 10px 0; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; background: #eee; font-weight: bold; white-space: nowrap; }
         .tab-btn.active { background: #007bff; color: white; }
-        
-        .lead-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid #25d366; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .lead-info b { font-size: 16px; display: block; }
-        .lead-info span { font-size: 11px; color: #888; }
-        .btn-call { background: #25d366; color: white; padding: 8px 12px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px; }
-        .btn-danger { background: #dc3545; color: white; margin-top: 30px; border-radius: 8px; padding: 12px; font-size: 12px; font-weight: bold; }
+        .card-adm { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #007bff; display: flex; justify-content: space-between; align-items: center;}
+        .grid-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .img-adm { width: 100%; height: 80px; object-fit: cover; border-radius: 5px; }
+        .btn-mini { padding: 5px 8px; font-size: 10px; border: none; border-radius: 4px; color: white; cursor: pointer; }
     </style>
 </head>
-<body style="background: #f8f9fa;">
+<body style="background: #f4f7f6;">
 
-    <div class="header">
-        <h1 class="logo-centralizado">PAINEL CONTROLE</h1>
-    </div>
+    <div class="header"><h1 class="logo-centralizado">PAINEL DE CONTROLE</h1></div>
 
-    <div class="container" style="max-width: 550px;">
+    <div class="container" style="max-width: 600px;">
         <div class="tab-menu">
-            <button class="tab-btn active" onclick="openTab('liberacao')">🔑 Liberação</button>
+            <button class="tab-btn active" onclick="openTab('pix')">🔑 Pix</button>
             <button class="tab-btn" onclick="openTab('leads')">📱 Leads</button>
-            <button class="tab-btn" onclick="openTab('config')">⚙️ Ajustes</button>
+            <button class="tab-btn" onclick="openTab('galeria')">📸 Galeria</button>
+            <button class="tab-btn" onclick="openTab('parceiros')">👷 Técnicos</button>
+            <button class="tab-btn" onclick="openTab('config')">⚙️ Reset</button>
         </div>
 
-        <div id="liberacao" class="admin-tab active-tab">
-            <h3>Liberar ID do Pix</h3>
-            <input type="number" id="input-id" placeholder="Digite o ID (ex: 1234)" style="font-size: 20px; text-align: center; margin-top: 15px;">
-            <button onclick="validarID()" style="background: #28a745; font-size: 18px; font-weight: bold;">LIBERAR ACESSO ✅</button>
+        <div id="pix" class="admin-tab active-tab">
+            <h3>Liberar ID</h3>
+            <input type="number" id="input-id" placeholder="Ex: 1234">
+            <button onclick="validarID()" style="background: #28a745;">LIBERAR ACESSO</button>
         </div>
 
         <div id="leads" class="admin-tab">
             <h3>Contatos do Chatbot</h3>
-            <div id="lista-leads" style="margin-top: 15px;"></div>
-            <button class="btn-danger" onclick="limparLeads()">🗑️ APAGAR TODOS OS LEADS</button>
+            <div id="lista-leads"></div>
+        </div>
+
+        <div id="galeria" class="admin-tab">
+            <h4>Novas para Aprovar:</h4>
+            <div id="fotos-temp" class="grid-fotos"></div>
+            <h4 style="margin-top:20px">No Site:</h4>
+            <div id="fotos-site" class="grid-fotos"></div>
+        </div>
+
+        <div id="parceiros" class="admin-tab">
+            <h3>Gerenciar Colaboradores</h3>
+            <div id="lista-colabs"></div>
         </div>
 
         <div id="config" class="admin-tab">
-            <h3>Manutenção do Sistema</h3>
-            <p style="font-size: 13px; color: #666; margin: 15px 0;">Use estes botões para limpar o banco de dados no final do dia.</p>
-            <button class="btn-danger" onclick="limparSessoes()" style="width: 100%;">🗑️ RESETAR TODOS OS IDs (SESSOES)</button>
-            <p style="font-size: 11px; color: red; margin-top: 5px;">*Isso impedirá que IDs antigos sejam usados.</p>
+            <button onclick="limparSessoes()" style="background: #dc3545; margin-bottom: 10px;">🗑️ LIMPAR TODOS OS IDs</button>
+            <button onclick="limparLeads()" style="background: #dc3545;">🗑️ APAGAR TODOS OS LEADS</button>
         </div>
     </div>
 
@@ -62,57 +69,72 @@
             document.getElementById(name).classList.add('active-tab');
             event.currentTarget.classList.add('active');
             if(name === 'leads') carregarLeads();
+            if(name === 'galeria') carregarGaleria();
+            if(name === 'parceiros') carregarColabs();
         }
 
         async function validarID() {
             const id = document.getElementById('input-id').value;
-            if(!id) return;
-            const res = await fetch(`${API}/api/admin/liberar-por-id`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id_visto: id })
-            });
-            if(res.ok) {
-                Swal.fire('Sucesso', `ID ${id} liberado!`, 'success');
-                document.getElementById('input-id').value = '';
-            } else {
-                Swal.fire('Erro', 'ID não encontrado.', 'error');
-            }
+            await fetch(`${API}/api/admin/liberar-por-id`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id_visto: id }) });
+            Swal.fire('OK', 'ID Liberado', 'success');
         }
 
         async function carregarLeads() {
-            const container = document.getElementById('lista-leads');
             const res = await fetch(`${API}/api/admin/contatos`);
             const leads = await res.json();
-            if(leads.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:#999;'>Nenhum lead encontrado.</p>";
-                return;
-            }
-            container.innerHTML = leads.reverse().map(l => `
-                <div class="lead-card">
-                    <div class="lead-info"><b>${l.telefone}</b><span>📅 ${l.data}</span></div>
-                    <a href="https://wa.me/55${l.telefone.replace(/\D/g,'')}" class="btn-call">WHATS</a>
+            document.getElementById('lista-leads').innerHTML = leads.reverse().map(l => `
+                <div class="card-adm">
+                    <div><b>${l.telefone}</b><br><small>${l.data}</small></div>
+                    <a href="https://wa.me/55${l.telefone.replace(/\D/g,'')}" class="btn-mini" style="background:#25d366; text-decoration:none;">WHATS</a>
                 </div>
             `).join('');
         }
 
-        async function limparLeads() {
-            const result = await Swal.fire({ title: 'Apagar tudo?', text: "Você perderá todos os telefones!", icon: 'warning', showCancelButton: true });
-            if(result.isConfirmed) {
-                await fetch(`${API}/api/admin/limpar-leads`, { method: 'POST' });
-                carregarLeads();
-                Swal.fire('Apagado!', '', 'success');
-            }
+        async function carregarGaleria() {
+            const resT = await fetch(`${API}/api/admin/temp-fotos`);
+            const temp = await resT.json();
+            document.getElementById('fotos-temp').innerHTML = temp.map(f => `
+                <div><img src="${API}/temp/${f}" class="img-adm">
+                <button class="btn-mini" style="background:green" onclick="admFoto('${f}', 'aprovar')">✅</button>
+                <button class="btn-mini" style="background:red" onclick="admFoto('${f}', 'excluir-temp')">❌</button></div>
+            `).join('');
+
+            const resS = await fetch(`${API}/api/galeria`);
+            const site = await resS.json();
+            document.getElementById('fotos-site').innerHTML = site.map(f => `
+                <div><img src="${API}/fotos/${f}" class="img-adm">
+                <button class="btn-mini" style="background:red; width:100%" onclick="admFoto('${f}', 'excluir-site')">EXCLUIR</button></div>
+            `).join('');
         }
 
-        async function limparSessoes() {
-            const result = await Swal.fire({ title: 'Resetar IDs?', text: "Todos os clientes terão que gerar novos IDs.", icon: 'warning', showCancelButton: true });
-            if(result.isConfirmed) {
-                await fetch(`${API}/api/admin/limpar-sessoes`, { method: 'POST' });
-                Swal.fire('Sistema Resetado!', '', 'success');
-            }
+        async function admFoto(nome, acao) {
+            let rota = acao === 'aprovar' ? 'aprovar-foto' : 'excluir-foto';
+            let pasta = acao === 'excluir-site' ? 'fotos' : 'temp';
+            await fetch(`${API}/api/admin/${rota}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nome, pasta }) });
+            carregarGaleria();
         }
+
+        async function carregarColabs() {
+            const res = await fetch(`${API}/api/admin/listar-colabs`);
+            const colabs = await res.json();
+            document.getElementById('lista-colabs').innerHTML = colabs.map(c => `
+                <div class="card-adm" style="border-left-color:${c.aprovado ? 'green':'orange'}">
+                    <div><b>${c.nome}</b><br><small>${c.funcao}</small></div>
+                    <div>
+                        ${!c.aprovado ? `<button class="btn-mini" style="background:green" onclick="admColab(${c.id}, 'aprovar')">OK</button>` : ''}
+                        <button class="btn-mini" style="background:red" onclick="admColab(${c.id}, 'excluir')">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function admColab(id, acao) {
+            await fetch(`${API}/api/admin/${acao}-colab`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+            carregarColabs();
+        }
+
+        async function limparSessoes() { await fetch(`${API}/api/admin/limpar-sessoes`, {method:'POST'}); Swal.fire('Limpo'); }
+        async function limparLeads() { await fetch(`${API}/api/admin/limpar-leads`, {method:'POST'}); carregarLeads(); Swal.fire('Limpo'); }
     </script>
 </body>
 </html>
-
