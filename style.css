@@ -263,3 +263,37 @@ button {
 
 .chat-input-area input { margin-bottom: 0; flex: 1; padding: 8px; }
 .chat-input-area button { width: auto; padding: 8px 15px; margin-left: 5px; }
+/* BALÃO DE SAUDAÇÃO AUTOMÁTICA */
+#chat-greeting {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 15px 15px 0 15px; /* Formato de balão de fala */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    z-index: 2900;
+    display: none; /* Começa escondido */
+    animation: bounceIn 0.8s ease; /* Efeito de entrada */
+    border: 1px solid #eee;
+}
+
+#chat-greeting::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 15px;
+    border-width: 10px 10px 0 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
