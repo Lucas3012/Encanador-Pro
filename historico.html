@@ -3,44 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico - Encanador Pro</title>
+    <title>Histórico de Pedidos</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .filtros { display: flex; gap: 5px; margin-bottom: 20px; }
+        .filtros button { font-size: 12px; padding: 10px 5px; background: #6c757d; }
+        .filtros button.active { background: var(--primary); }
+        .tabela-historico { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
+        .tabela-historico th, .tabela-historico td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .tabela-historico th { background: #f8f9fa; }
+        .status-badge { padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .status-liberado { background: #d4edda; color: #155724; }
+        .status-pendente { background: #fff3cd; color: #856404; }
+    </style>
 </head>
 <body>
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span style="font-weight: bold; font-size: 20px;">Histórico de Serviços</span>
+        <b>Histórico de Pedidos</b>
     </div>
+
     <div id="mySidebar" class="sidebar">
-        <span class="close-btn" onclick="toggleNav()">&times;</span>
-        <a href="index.html">Início</a>
-        <a href="galeria.html">Galeria</a>
-        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="historico.html">Histórico</a>
-        <a href="admin.html">Admin</a>
+        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="historico.html">📋 Histórico</a>
+        <a href="galeria.html">📸 Galeria</a>
+        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
-        <h1>📜 Últimos Atendimentos</h1>
-        <div id="lista-historico">Carregando serviços...</div>
+        <div class="filtros">
+            <button onclick="carregarHistorico('todos', this)" class="active">Todos</button>
+            <button onclick="carregarHistorico('dia', this)">Hoje</button>
+            <button onclick="carregarHistorico('semana', this)">Semana</button>
+            <button onclick="carregarHistorico('mes', this)">Mês</button>
+        </div>
+
+        <table class="tabela-historico">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Serviço</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela">
+                </tbody>
+        </table>
     </div>
 
     <script>
+        const API = "http://localhost:3000";
+
         function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
         }
 
-        async function carregarHistorico() {
-            // Aqui você pode buscar fotos da galeria ou uma rota específica
-            const res = await fetch(`http://localhost:3000/api/fotos`);
-            const fotos = await res.json();
-            document.getElementById('lista-historico').innerHTML = fotos.map(f => `
-                <div style="border-bottom: 1px solid #ddd; padding: 10px;">
-                    ✅ Serviço concluído com sucesso em ${new Date().toLocaleDateString()}
-                </div>
-            `).join('');
+        async function carregarHistorico(filtro = 'todos', btn) {
+            // Atualizar botões ativos
+            document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+
+            try {
+                const res = await fetch(`${API}/api/admin/historico`);
+                let dados = await res.json();
+                const agora = new Date();
+
+                if (filtro === 'dia') {
+                    dados = dados.filter(d => new Date(d.data).toDateString() === agora.toDateString());
+                } else if (filtro === 'semana') {
+                    const seteDias = 7 * 24 * 60 * 60 * 1000;
+                    dados = dados.filter(d => (agora - new Date(d.data)) < seteDias);
+                } else if (filtro === 'mes') {
+                    dados = dados.filter(d => new Date(d.data).getMonth() === agora.getMonth());
+                }
+
+                const html = dados.map(item => `
+                    <tr>
+                        <td>#${item.id_visto}</td>
+                        <td>${item.servico}</td>
+                        <td>${new Date(item.data).toLocaleDateString('pt-BR')}</td>
+                        <td><span class="status-badge status-${item.status}">${item.status.toUpperCase()}</span></td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('corpo-tabela').innerHTML = html || '<tr><td colspan="4" style="text-align:center">Nenhum pedido encontrado.</td></tr>';
+            } catch (e) {
+                Swal.fire('Erro', 'Não foi possível carregar o histórico', 'error');
+            }
         }
+
+        // Carregar ao iniciar
         carregarHistorico();
     </script>
 </body>
