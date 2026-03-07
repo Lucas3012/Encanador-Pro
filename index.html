@@ -9,8 +9,8 @@
 </head>
 <body>
     <div class="status-bar">
-        <span>📍 Cobertura: Itabuna e Região</span>
-        <span id="sys-status"><span class="dot offline"></span> Verificando Servidor...</span>
+        <span>📍 Itabuna e Região</span>
+        <span id="sys-status"><span class="dot offline"></span> Verificando...</span>
     </div>
 
     <div class="header">
@@ -27,14 +27,13 @@
     </div>
 
     <div class="container">
-        <h2 style="text-align:center">🛠️ Nossos Serviços</h2>
+        <h2 style="text-align:center">🛠️ Serviços</h2>
         <div class="servicos-destaque">
             <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
             <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
 
-        <h3 style="font-size:14px; margin-bottom:10px;">📍 Área de Atendimento:</h3>
         <div id="map"></div>
 
         <div id="form-container" style="display:none; margin-top:20px;">
@@ -51,35 +50,33 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://proof-wal-centers-resulting.trycloudflare.com";
+        const API_BASE = "https://told-istanbul-instructions-instruction.trycloudflare.com";
         const MEU_WHATSAPP = "5573988478170";
 
-        // CONFIGURAÇÃO DO MAPA (ITABUNA)
+        // CONFIGURAÇÃO DO MAPA
         const map = L.map('map').setView([-14.7967, -39.2814], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        
-        // Círculo Vermelho de Cobertura
-        L.circle([-14.7967, -39.2814], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.2,
-            radius: 3000 // 3km de cobertura
-        }).addTo(map).bindPopup("Atendimento Rápido em Itabuna");
+        L.circle([-14.7967, -39.2814], { color: 'red', fillOpacity: 0.1, radius: 4000 }).addTo(map);
 
-        // VERIFICAR STATUS DO SERVIDOR
+        async function carregarTecnicosNoMapa() {
+            try {
+                const res = await fetch(`${API_BASE}/api/aprovados`);
+                const técnicos = await res.json();
+                técnicos.forEach(t => {
+                    const lat = -14.7967 + (Math.random() - 0.5) * 0.03;
+                    const lng = -39.2814 + (Math.random() - 0.5) * 0.03;
+                    L.marker([lat, lng]).addTo(map).bindPopup(`<b>👷 ${t.funcao}</b><br>${t.nome}<br><span style="color:green">Disponível</span>`);
+                });
+            } catch (e) { console.log("Erro ao carregar técnicos"); }
+        }
+
         async function checkStatus() {
-            const statusEl = document.getElementById('sys-status');
+            const el = document.getElementById('sys-status');
             try {
                 const res = await fetch(`${API_BASE}/api/galeria`);
-                if(res.ok) {
-                    statusEl.innerHTML = `<span class="dot online"></span> Sistema Online`;
-                }
-            } catch (e) {
-                statusEl.innerHTML = `<span class="dot offline"></span> Sistema Offline (Ligue o Termux)`;
-            }
+                el.innerHTML = res.ok ? `<span class="dot online"></span> Sistema Online` : `<span class="dot offline"></span> Offline`;
+            } catch (e) { el.innerHTML = `<span class="dot offline"></span> Offline`; }
         }
-        setInterval(checkStatus, 5000);
-        checkStatus();
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
@@ -92,21 +89,12 @@
             const linkWhats = `https://wa.me/${MEU_WHATSAPP}?text=${encodeURIComponent('Olá, código #' + idGerado + '. Pagamento realizado aguardando liberação.')}`;
 
             Swal.fire({
-                title: 'Reserva de Atendimento',
-                html: `
-                    <p style="font-size:13px">INFORME ESTE CÓDIGO AO ENCANADOR:</p>
-                    <span class="pedido-id-vermelho">#${idGerado}</span>
-                    <button onclick="window.open('${linkWhats}', '_blank')" style="background:#25d366; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; margin-bottom:10px;">ENVIAR CÓDIGO VIA WHATSAPP 💬</button>
-                    <p style="font-size:11px">Após o pagamento, clique no botão acima.</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}">
-                `,
+                title: 'Reserva',
+                html: `<p>CÓDIGO:</p><span class="pedido-id-vermelho">#${idGerado}</span><button onclick="window.open('${linkWhats}', '_blank')" style="background:#25d366; color:white; border:none; padding:12px; border-radius:8px; width:100%; margin-bottom:10px;">ENVIAR VIA WHATSAPP 💬</button><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}">`,
                 allowOutsideClick: false, showConfirmButton: false
             });
 
-            await fetch(`${API_BASE}/api/registrar-id`, { 
-                method: 'POST', headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({id_visto: idGerado, servico}) 
-            });
+            await fetch(`${API_BASE}/api/registrar-id`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id_visto: idGerado, servico}) });
 
             const timer = setInterval(async () => {
                 const res = await fetch(`${API_BASE}/api/status/${idGerado}`);
@@ -122,9 +110,13 @@
 
         document.getElementById('formOrcamento').onsubmit = (e) => {
             e.preventDefault();
-            const texto = `*PEDIDO CONFIRMADO*%0A*Serviço:* ${document.getElementById('serv_display').value}%0A*Nome:* ${document.getElementById('nome').value}%0A*End:* ${document.getElementById('end').value}`;
+            const texto = `*NOVO PEDIDO*%0A*Serviço:* ${document.getElementById('serv_display').value}%0A*Nome:* ${document.getElementById('nome').value}%0A*End:* ${document.getElementById('end').value}`;
             window.open(`https://wa.me/${MEU_WHATSAPP}?text=${texto}`, '_blank');
         };
+
+        checkStatus();
+        setInterval(checkStatus, 5000);
+        carregarTecnicosNoMapa();
     </script>
 </body>
 </html>
