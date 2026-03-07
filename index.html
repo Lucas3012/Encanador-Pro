@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
         <span style="font-weight: bold;">Encanador Pro</span>
@@ -15,12 +16,16 @@
 
     <div id="mySidebar" class="sidebar">
         <span class="close-btn" onclick="toggleNav()">&times;</span>
-        <a href="index.html">Início</a>
-        <a href="admin.html">Painel Admin</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="galeria.html">📸 Galeria de Fotos</a>
+        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
+        <a href="historico.html">📜 Histórico</a>
+        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
         <h1 style="text-align: center;">🛠️ Serviços</h1>
+        
         <div class="servicos-destaque">
             <div class="circulo-servico" onclick="abrirPix('Vazamento')">
                 <div class="icone-bola">💧</div>
@@ -38,41 +43,53 @@
 
         <div id="form-container" style="display: none;">
             <form id="formOrcamento">
-                <h3 style="color: #25d366; text-align: center;">✅ Liberado!</h3>
+                <h3 style="color: #25d366; text-align: center;">✅ Pagamento Validado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="endereco" placeholder="Endereço" required>
+                <input type="text" id="endereco" placeholder="Seu Endereço" required>
                 <input type="text" id="servico_display" readonly>
-                <textarea id="mensagem" placeholder="Detalhes..." rows="3"></textarea>
+                <textarea id="mensagem" placeholder="Diga o que aconteceu..." rows="3"></textarea>
                 <button type="submit" style="background: #25d366;">Enviar via WhatsApp 💬</button>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://probability-quizzes-cars-convention.trycloudflare.com";
+        const API_BASE = "https://strict-portraits-fame-bottle.trycloudflare.com";
         let idGerado = "";
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
+            // Se estiver fechado, abre. Se estiver aberto, fecha.
+            if (s.style.width === "250px") {
+                s.style.width = "0";
+            } else {
+                s.style.width = "250px";
+            }
         }
 
         async function abrirPix(servico) {
-            idGerado = Math.floor(1000 + Math.random() * 9000).toString(); // Gera ID de 4 dígitos
+            idGerado = Math.floor(1000 + Math.random() * 9000).toString();
             const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
             
             Swal.fire({
-                title: 'Reserva',
-                html: `<p>INFORME ESTE CÓDIGO:</p><span class="pedido-id-neon">#${idGerado}</span>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}">
-                <span class="pix-code">${pix}</span>`,
-                allowOutsideClick: false, showConfirmButton: false
+                title: 'Pagamento de Reserva',
+                html: `
+                    <p>INFORME ESTE CÓDIGO:</p>
+                    <span class="pedido-id-neon">#${idGerado}</span>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px;">
+                    <span class="pix-code">${pix}</span>
+                    <p style="font-size: 11px; color: #666;">O formulário será liberado após a validação.</p>
+                `,
+                allowOutsideClick: false,
+                showConfirmButton: false
             });
 
             await fetch(`${API_BASE}/api/registrar-id`, { 
-                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({id_visto: idGerado, servico}) 
             });
+
             checarStatus(servico);
         }
 
@@ -81,16 +98,23 @@
                 const res = await fetch(`${API_BASE}/api/status/${idGerado}`);
                 const d = await res.json();
                 if(d.status === 'liberado') {
-                    clearInterval(intv); Swal.close();
+                    clearInterval(intv);
+                    Swal.close();
                     document.getElementById('form-container').style.display = 'block';
                     document.getElementById('servico_display').value = servico;
+                    document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
                 }
             }, 3000);
         }
 
-        document.getElementById('formOrcamento').onsubmit = (e) => {
+        document.getElementById('formOrcamento').onsubmit = function(e) {
             e.preventDefault();
-            const texto = `*Pedido #${idGerado}*%0A*Nome:* ${document.getElementById('nome').value}%0A*Endereço:* ${document.getElementById('endereco').value}`;
+            const nome = document.getElementById('nome').value;
+            const end = document.getElementById('endereco').value;
+            const msg = document.getElementById('mensagem').value;
+            const serv = document.getElementById('servico_display').value;
+            
+            const texto = `*Pedido #${idGerado}*%0A*Serviço:* ${serv}%0A*Nome:* ${nome}%0A*Endereço:* ${end}%0A*Mensagem:* ${msg}`;
             window.open(`https://wa.me/5573988478170?text=${texto}`, '_blank');
         };
     </script>
