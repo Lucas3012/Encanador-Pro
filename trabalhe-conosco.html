@@ -1,13 +1,96 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabalhe Conosco</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seja um Parceiro - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Estilos Exclusivos para a Página de Cadastro */
+        .header-cadastro {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header-cadastro h2 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header-cadastro p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 12px;
+            top: 35px;
+            color: var(--primary);
+        }
+
+        .input-icon {
+            padding-left: 15px !important;
+            border: 2px solid #eee !important;
+            transition: 0.3s;
+        }
+
+        .input-icon:focus {
+            border-color: var(--primary) !important;
+            background-color: #f0f7ff;
+        }
+
+        .badge-info {
+            background: #e7f3ff;
+            color: #007bff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .btn-enviar-colab {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-enviar-colab:active {
+            transform: scale(0.98);
+        }
+    </style>
 </head>
 <body>
-    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Seja Parceiro</b></div>
+
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <h1 class="logo-centralizado">
+            <span class="drop-icon">💧</span>ENCANADOR PRO
+        </h1>
+        <div style="width: 24px;"></div> 
+    </div>
+
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
@@ -18,23 +101,89 @@
     </div>
 
     <div class="container">
-        <form id="formColab">
-            <input type="text" id="n" placeholder="Nome Completo" required>
-            <input type="tel" id="t" placeholder="WhatsApp (DDD + Número)" required>
-            <select id="fun"><option value="Encanador">Encanador</option><option value="Eletricista">Eletricista</option></select>
-            <textarea id="e" placeholder="Experiência..."></textarea>
-            <button type="submit">CADASTRAR E APARECER NO MAPA</button>
+        <div class="header-cadastro">
+            <h2>Venha para o Time! 👷‍♂️</h2>
+            <p>Aumente seus serviços em Itabuna sendo um técnico parceiro.</p>
+        </div>
+
+        <div class="badge-info">
+            🔔 <b>Como funciona:</b> Após enviar seu cadastro, nossa equipe analisará seu perfil. Uma vez aprovado, você aparecerá no mapa e na lista de técnicos da página inicial!
+        </div>
+
+        <form id="formColaborador">
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="nome_colab" class="input-icon" placeholder="Ex: João Silva" required>
+            </div>
+
+            <div class="form-group">
+                <label>Sua Especialidade</label>
+                <select id="funcao_colab" class="input-icon" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #eee;">
+                    <option value="Encanador Geral">Encanador Geral</option>
+                    <option value="Especialista em Vazamentos">Especialista em Vazamentos</option>
+                    <option value="Desentupidor">Desentupidor</option>
+                    <option value="Instalação de Bombas">Instalação de Bombas</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>WhatsApp (com DDD)</label>
+                <input type="number" id="tel_colab" class="input-icon" placeholder="73999999999" required>
+            </div>
+
+            <div class="form-group">
+                <label>Bairro de Atuação Principal</label>
+                <input type="text" id="bairro_colab" class="input-icon" placeholder="Ex: Centro, Conceição..." required>
+            </div>
+
+            <button type="submit" class="btn-enviar-colab">SOLICITAR APROVAÇÃO ✅</button>
         </form>
     </div>
 
     <script>
-        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
-        document.getElementById('formColab').onsubmit = async (e) => {
+        const API = "http://localhost:3000";
+
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
+
+        document.getElementById('formColaborador').onsubmit = async (e) => {
             e.preventDefault();
-            Swal.fire({ title: 'Processando...', didOpen: () => Swal.showLoading() });
-            const dados = { nome: document.getElementById('n').value, telefone: document.getElementById('t').value, funcao: document.getElementById('fun').value, exp: document.getElementById('e').value };
-            await fetch('http://localhost:3000/api/colaborador', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dados) });
-            Swal.fire('Sucesso!', 'Seu cadastro foi enviado.', 'success').then(() => location.href="index.html");
+
+            const novoColab = {
+                nome: document.getElementById('nome_colab').value,
+                funcao: document.getElementById('funcao_colab').value,
+                telefone: document.getElementById('tel_colab').value,
+                bairro: document.getElementById('bairro_colab').value
+            };
+
+            Swal.fire({
+                title: 'Enviando Cadastro...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const res = await fetch(`${API}/api/colaborador`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(novoColab)
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cadastro Recebido!',
+                        text: 'Aguarde nossa análise. Entraremos em contato via WhatsApp.',
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        window.location.href = "index.html";
+                    });
+                }
+            } catch (err) {
+                Swal.fire('Erro', 'Servidor offline. Tente novamente mais tarde.', 'error');
+            }
         };
     </script>
 </body>
