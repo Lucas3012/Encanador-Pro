@@ -3,12 +3,17 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// CONFIGURAÇÃO DE DIRETÓRIOS
+// --- CONFIGURAÇÃO GEMINI AI ---
+const genAI = new GoogleGenerativeAI("AIzaSyA87E5vtKYlw2Ow765EIF8463FH_LjZdZc");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// --- CONFIGURAÇÃO DE DIRETÓRIOS ---
 const DATA_DIR = path.join(__dirname, 'data');
 const UPLOADS = path.join(__dirname, 'uploads');
 const TEMP = path.join(__dirname, 'temp_galeria');
@@ -32,7 +37,34 @@ app.use('/temp', express.static(TEMP));
 const limparID = (id) => String(id).replace('#', '').trim();
 
 // ==========================================
-//           ROTAS PÚBLICAS (CLIENTE)
+//           ROTA DE INTELIGÊNCIA (GEMINI)
+// ==========================================
+
+app.post('/api/chat-gemini', async (req, res) => {
+    const { mensagem } = req.body;
+
+    try {
+        const prompt = `Você é o "Mestre Encanador", assistente inteligente da Encanador Pro em Itabuna-BA.
+        REGRAS DE OURO:
+        1. Localidade: Você atende Itabuna (Centro, Conceição, Fátima, Santo Antônio, Mangabinha, etc).
+        2. Gatilhos: Chegada em 30 a 60 min. Garantia de 90 dias. Aceita PIX e Cartão.
+        3. Comportamento: Seja prestativo, dê dicas rápidas (ex: fechar registro se houver vazamento), mas SEMPRE tente conseguir o WhatsApp do cliente para o técnico ligar.
+        4. Serviços: Vazamentos, Reparos Hidráulicos e Desentupimentos.
+        5. Se o cliente mandar um número de telefone, agradeça e diga que o técnico já foi avisado.
+        
+        Pergunta do cliente: ${mensagem}`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        res.json({ resposta: response.text() });
+    } catch (error) {
+        console.error("Erro Gemini:", error);
+        res.json({ resposta: "Estou com um probleminha na conexão, mas pode deixar seu WhatsApp aqui que o mestre te liga agora!" });
+    }
+});
+
+// ==========================================
+//           ROTAS DE DADOS E LEADS
 // ==========================================
 
 app.post('/api/registrar-id', (req, res) => {
@@ -50,32 +82,20 @@ app.get('/api/status/:id', (req, res) => {
 
 app.post('/api/contato-chatbot', (req, res) => {
     const contatos = JSON.parse(fs.readFileSync(CONTATOS_PATH));
-    contatos.push({ telefone: req.body.telefone, data: new Date().toLocaleString('pt-BR') });
+    contatos.push({ telefone: req.body.telefone, data: new Date().toLocaleString('pt-BR'), origem: "Chatbot Gemini" });
     fs.writeFileSync(CONTATOS_PATH, JSON.stringify(contatos, null, 2));
     res.json({ success: true });
 });
-
-app.get('/api/galeria', (req, res) => res.json(fs.readdirSync(UPLOADS)));
 
 app.get('/api/aprovados', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     res.json(db.colaboradores.filter(c => c.aprovado));
 });
 
-app.post('/api/upload-galeria', upload.single('foto'), (req, res) => res.json({ success: true }));
-
-app.post('/api/colaborador', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
-    db.colaboradores.push({ id: Date.now(), ...req.body, aprovado: false });
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ success: true });
-});
-
 // ==========================================
 //           ROTAS ADMINISTRATIVAS
 // ==========================================
 
-// Leads e IDs
 app.get('/api/admin/contatos', (req, res) => res.json(JSON.parse(fs.readFileSync(CONTATOS_PATH))));
 
 app.post('/api/admin/liberar-por-id', (req, res) => {
@@ -86,10 +106,10 @@ app.post('/api/admin/liberar-por-id', (req, res) => {
         db.sessoes[i].status = "liberado";
         fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
         res.json({ success: true });
-    } else res.status(404).json({ error: "Erro" });
+    } else res.status(404).send();
 });
 
-// Gestão de Técnicos
+// Gestão de Colaboradores
 app.get('/api/admin/listar-colabs', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     res.json(db.colaboradores);
@@ -110,23 +130,7 @@ app.post('/api/admin/excluir-colab', (req, res) => {
     res.json({ success: true });
 });
 
-// Gestão de Fotos
-app.get('/api/admin/temp-fotos', (req, res) => res.json(fs.readdirSync(TEMP)));
-
-app.post('/api/admin/aprovar-foto', (req, res) => {
-    const foto = req.body.nome;
-    fs.renameSync(path.join(TEMP, foto), path.join(UPLOADS, foto));
-    res.json({ success: true });
-});
-
-app.post('/api/admin/excluir-foto', (req, res) => {
-    const { nome, pasta } = req.body;
-    const alvo = pasta === 'temp' ? TEMP : UPLOADS;
-    if (fs.existsSync(path.join(alvo, nome))) fs.unlinkSync(path.join(alvo, nome));
-    res.json({ success: true });
-});
-
-// Limpezas
+// Limpezas de Dados
 app.post('/api/admin/limpar-sessoes', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     db.sessoes = [];
@@ -139,4 +143,4 @@ app.post('/api/admin/limpar-leads', (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(3000, () => console.log("🚀 Servidor Full Power na Porta 3000"));
+app.listen(3000, () => console.log("🚀 Servidor Inteligente com Gemini Ativo na Porta 3000"));

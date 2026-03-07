@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro - Itabuna</title>
+    <title>Encanador Pro - Itabuna (IA Powered)</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -26,7 +26,6 @@
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
-        <a href="historico.html">📋 Histórico</a>
         <a href="galeria.html">📸 Galeria</a>
         <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
         <a href="admin.html">🔐 Painel Admin</a>
@@ -39,46 +38,46 @@
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
 
-        <div class="secao-titulo">👨‍🔧 Profissionais Online:</div>
+        <div class="secao-titulo">👨‍🔧 Técnicos de Plantão:</div>
         <div id="lista-tecnicos"></div>
 
-        <div class="secao-titulo">📍 Área de Cobertura:</div>
+        <div class="secao-titulo">📍 Cobertura em Itabuna:</div>
         <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #fff;"></div>
 
         <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-top: 20px;">
             <form id="formOrcamento">
-                <h3 style="color:#25d366; text-align:center">✅ Acesso Liberado!</h3>
+                <h3 style="color:#25d366; text-align:center">✅ Pagamento Confirmado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="end" placeholder="Seu Endereço" required>
+                <input type="text" id="end" placeholder="Seu Endereço em Itabuna" required>
                 <input type="text" id="serv_display" readonly style="background: #f0f0f0;">
-                <textarea id="msg" placeholder="Detalhes do problema..." rows="3"></textarea>
+                <textarea id="msg" placeholder="Descreva brevemente o problema..." rows="3"></textarea>
                 <button type="submit" style="background:#25d366; color: white; font-weight: bold;">CHAMAR NO WHATSAPP 💬</button>
             </form>
         </div>
     </div>
 
-    <div id="chat-greeting" onclick="toggleChat()">Olá! 👋 Precisa de ajuda ou orçamento?</div>
+    <div id="chat-greeting" onclick="toggleChat()">Olá! 👋 Sou o Mestre Encanador. Como posso ajudar?</div>
     <div id="chat-button" onclick="toggleChat()">💬</div>
     
     <div id="chat-window">
         <div class="chat-header">
-            <span>Assistente Pro</span>
+            <span>Assistente IA</span>
             <span onclick="toggleChat()" style="cursor:pointer; font-size: 24px;">&times;</span>
         </div>
         <div class="chat-messages" id="chat-content">
-            <div class="msg-bot">Olá! Sou o assistente virtual. Se precisar que um técnico te ligue, digite seu número!</div>
+            <div class="msg-bot">Olá! Sou o Mestre Encanador da Encanador Pro. Estou online para tirar dúvidas sobre vazamentos, reparos ou preços em Itabuna. Digite sua dúvida ou seu WhatsApp!</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="user-msg" placeholder="Dúvida ou WhatsApp...">
+            <input type="text" id="user-msg" placeholder="Pergunte algo ou deixe seu Zap...">
             <button onclick="enviarDuvida()">➤</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://want-sat-sig-specialists.trycloudflare.com";
-        const WHATS_GESTOR = "5573988478170";
+        const API_BASE = "https://recommendations-fighter-unable-definitely.trycloudflare.com";
 
+        // CONFIGURAÇÃO DO MAPA
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -94,6 +93,7 @@
             g.style.display = 'none';
         }
 
+        // VERIFICAR SE O SERVIDOR ESTÁ LIGADO
         async function checkStatus() {
             const statusText = document.getElementById('sys-status');
             try {
@@ -106,12 +106,14 @@
             }
         }
 
+        // SISTEMA DE PIX E LIBERAÇÃO
         async function abrirPix(servico) {
             const idLimpo = Math.floor(1000 + Math.random() * 9000).toString();
             Swal.fire({
-                title: 'Reserva de Atendimento',
-                html: `<p>ID: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX" style="margin:15px;">`,
-                showConfirmButton: false
+                title: 'Reserva Técnica',
+                html: `<p>ID do Chamado: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CHAVE_PIX_AQUI" style="margin:15px;"><p style="font-size:12px">Após o pagamento, aguarde a liberação automática nesta tela.</p>`,
+                showConfirmButton: false,
+                allowOutsideClick: false
             });
 
             try {
@@ -128,12 +130,14 @@
                         clearInterval(check); 
                         Swal.close(); 
                         document.getElementById('form-container').style.display='block'; 
-                        document.getElementById('serv_display').value=servico; 
+                        document.getElementById('serv_display').value = servico; 
+                        window.scrollTo(0, document.body.scrollHeight);
                     }
                 }, 3000);
             } catch(e) {}
         }
 
+        // FUNÇÃO DO CHATBOT COM GEMINI AI
         function adicionarMsg(t, cl) {
             const c = document.getElementById('chat-content');
             const d = document.createElement('div'); d.className = cl; d.innerText = t;
@@ -141,23 +145,36 @@
         }
 
         async function enviarDuvida() {
-            const i = document.getElementById('user-msg');
-            const m = i.value.toLowerCase().trim();
-            if(!m) return;
-            adicionarMsg(i.value, 'msg-user'); i.value = '';
+            const input = document.getElementById('user-msg');
+            const msgOriginal = input.value;
+            const msg = msgOriginal.toLowerCase().trim();
+            
+            if(!msg) return;
 
-            setTimeout(async () => {
-                let r = "Para orçamentos, fale conosco no WhatsApp!";
-                if (m.length >= 8 && !isNaN(m.replace(/\D/g,''))) {
-                    r = "Recebi seu número! ✅ O técnico entrará em contato.";
-                    await fetch(`${API_BASE}/api/contato-chatbot`, { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({ telefone: m }) 
-                    });
-                }
-                adicionarMsg(r, 'msg-bot');
-            }, 1000);
+            adicionarMsg(msgOriginal, 'msg-user');
+            input.value = '';
+
+            // 1. Detecta Telefone (Lead) e salva no servidor
+            if (msg.length >= 8 && !isNaN(msg.replace(/\D/g,''))) {
+                await fetch(`${API_BASE}/api/contato-chatbot`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ telefone: msg }) 
+                });
+            }
+
+            // 2. Envia para o Gemini no Servidor
+            try {
+                const res = await fetch(`${API_BASE}/api/chat-gemini`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ mensagem: msgOriginal })
+                });
+                const data = await res.json();
+                adicionarMsg(data.resposta, 'msg-bot');
+            } catch (e) {
+                adicionarMsg("Desculpe, tive um erro de conexão. Deixe seu WhatsApp que o técnico te liga!", "msg-bot");
+            }
         }
 
         async function carregarTecnicos() {
@@ -169,15 +186,15 @@
                         <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
                         <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
                     </div>
-                `).join('');
+                `).join('') || "<p style='font-size:12px; color:#888;'>Buscando técnicos disponíveis...</p>";
             } catch(e) {}
         }
 
         window.onload = () => {
             carregarTecnicos();
             checkStatus();
-            setInterval(checkStatus, 10000);
-            setTimeout(() => { document.getElementById('chat-greeting').style.display = 'block'; }, 4000);
+            setInterval(checkStatus, 15000);
+            setTimeout(() => { document.getElementById('chat-greeting').style.display = 'block'; }, 5000);
         };
     </script>
 </body>
