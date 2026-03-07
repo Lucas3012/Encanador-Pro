@@ -12,19 +12,11 @@
 
     <div class="status-bar">
         <span>📍 Itabuna-BA</span>
-        <span id="sys-status">Verificando...</span>
+        <span id="sys-status">🟢 Verificando...</span>
     </div>
 
     <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
         <h1 class="logo-centralizado">💧 ENCANADOR PRO</h1>
-        <div style="width: 24px;"></div> 
-    </div>
-
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
-        <a href="index.html">🏠 Início</a>
-        <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
@@ -34,76 +26,85 @@
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
 
-        <div class="secao-titulo">👨‍🔧 Profissionais Online:</div>
+        <div class="secao-titulo">👨‍🔧 Profissionais de Plantão:</div>
         <div id="lista-tecnicos"></div>
 
-        <div class="secao-titulo">📍 Cobertura em Itabuna:</div>
+        <div class="secao-titulo">📍 Área de Cobertura:</div>
         <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #fff;"></div>
 
         <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366;">
-            <form id="formOrcamento">
-                <input type="text" id="end" placeholder="Seu Endereço em Itabuna" required>
-                <input type="text" id="serv_display" readonly>
-                <button type="submit" style="background:#25d366; color:white; font-weight:bold;">CHAMAR NO WHATSAPP</button>
-            </form>
+            <h3 style="text-align:center; color:#25d366;">✅ Acesso Liberado!</h3>
+            <input type="text" id="end" placeholder="Seu Endereço completo">
+            <input type="text" id="serv_display" readonly>
+            <button onclick="enviarWhats()" style="background:#25d366; color:white; font-weight:bold; border:none; padding:15px; width:100%; border-radius:10px;">CHAMAR NO WHATSAPP</button>
         </div>
     </div>
 
-    <div id="chat-greeting" onclick="toggleChat()">Dúvidas? Fale com o Mestre! 👋</div>
     <div id="chat-button" onclick="toggleChat()">💬</div>
-    <div id="chat-window">
-        <div class="chat-header"><span>Mestre Encanador (IA)</span><span onclick="toggleChat()">&times;</span></div>
-        <div class="chat-messages" id="chat-content"></div>
+    <div id="chat-window" style="display:none;">
+        <div class="chat-header"><span>Mestre Encanador IA</span><span onclick="toggleChat()" style="cursor:pointer">×</span></div>
+        <div class="chat-messages" id="chat-content">
+            <div class="msg-bot">Olá! Sou o Mestre. Qual o seu problema hidráulico em Itabuna hoje?</div>
+        </div>
         <div class="chat-input-area">
-            <input type="text" id="user-msg" placeholder="Sua dúvida ou Zap...">
+            <input type="text" id="user-msg" placeholder="Dúvida ou WhatsApp...">
             <button onclick="enviarDuvida()">➤</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // MUDAR PARA SEU LINK DA CLOUDFLARE
-        const API_BASE = "https://renewable-everything-january-aggregate.trycloudflare.com";
+        // --- COLOQUE O SEU LINK DA CLOUDFLARE AQUI ---
+        const API_BASE = "https://textbook-beginners-sit-satisfaction.trycloudflare.com";
 
-        // INICIALIZAR MAPA
+        // CONFIGURAÇÃO DO MAPA
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
-
         function toggleChat() {
             const w = document.getElementById('chat-window');
-            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
-            document.getElementById('chat-greeting').style.display = 'none';
+            w.style.display = (w.style.display === 'none' || w.style.display === '') ? 'flex' : 'none';
         }
 
-        // CARREGAR TÉCNICOS NOS CARDS
-        async function carregarTecnicos() {
-            try {
-                const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
-                const dados = await res.json();
-                document.getElementById('lista-tecnicos').innerHTML = dados.map(t => `
-                    <div class="card-tecnico">
-                        <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
-                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
-                    </div>
-                `).join('') || "Buscando técnicos...";
-            } catch(e) {}
+        function adicionarMsg(t, cl) {
+            const c = document.getElementById('chat-content');
+            const d = document.createElement('div'); d.className = cl; d.innerText = t;
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
 
-        async function checkStatus() {
+        async function enviarDuvida() {
+            const input = document.getElementById('user-msg');
+            const msg = input.value;
+            if(!msg) return;
+
+            adicionarMsg(msg, 'msg-user');
+            input.value = '';
+
+            // Captura de Lead (Telefone)
+            if (msg.replace(/\D/g,'').length >= 8) {
+                fetch(`${API_BASE}/api/contato-chatbot`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'},
+                    body: JSON.stringify({ telefone: msg })
+                });
+            }
+
             try {
-                const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
-                document.getElementById('sys-status').innerHTML = res.ok ? "🟢 Online" : "🔴 Erro";
-            } catch(e) { document.getElementById('sys-status').innerHTML = "🔴 Offline"; }
+                const res = await fetch(`${API_BASE}/api/chat-gemini`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'},
+                    body: JSON.stringify({ mensagem: msg })
+                });
+                const data = await res.json();
+                adicionarMsg(data.resposta, 'msg-bot');
+            } catch (e) {
+                adicionarMsg("Estou com um erro de conexão. Deixe seu WhatsApp!", "msg-bot");
+            }
         }
 
         async function abrirPix(servico) {
             const id = Math.floor(1000 + Math.random() * 9000).toString();
-            Swal.fire({ title: 'ID: #'+id, text: 'Pague o Pix para liberar o formulário.', showConfirmButton: false });
+            Swal.fire({ title: 'ID: #'+id, text: 'Pague o Pix para liberar o técnico.', showConfirmButton: false });
             
             await fetch(`${API_BASE}/api/registrar-id`, { 
                 method: 'POST', 
@@ -118,49 +119,26 @@
                     clearInterval(check); Swal.close();
                     document.getElementById('form-container').style.display='block';
                     document.getElementById('serv_display').value = servico;
+                    window.scrollTo(0, document.body.scrollHeight);
                 }
             }, 3000);
         }
 
-        function adicionarMsg(t, cl) {
-            const c = document.getElementById('chat-content');
-            const d = document.createElement('div'); d.className = cl; d.innerText = t;
-            c.appendChild(d); c.scrollTop = c.scrollHeight;
-        }
-
-        async function enviarDuvida() {
-            const input = document.getElementById('user-msg');
-            const msg = input.value;
-            if(!msg) return;
-            adicionarMsg(msg, 'msg-user'); input.value = '';
-
-            // Captura Telefone
-            if (msg.replace(/\D/g,'').length >= 8) {
-                fetch(`${API_BASE}/api/contato-chatbot`, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'}, 
-                    body: JSON.stringify({ telefone: msg }) 
-                });
-            }
-
+        async function carregarDados() {
             try {
-                const res = await fetch(`${API_BASE}/api/chat-gemini`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'},
-                    body: JSON.stringify({ mensagem: msg })
-                });
-                const data = await res.json();
-                adicionarMsg(data.resposta, 'msg-bot');
-            } catch (e) { 
-                adicionarMsg("Erro de conexão com a IA. Deixe seu WhatsApp!", "msg-bot"); 
-            }
+                const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
+                const dados = await res.json();
+                document.getElementById('lista-tecnicos').innerHTML = dados.map(t => `
+                    <div class="card-tecnico">
+                        <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
+                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
+                    </div>
+                `).join('') || "Buscando técnicos...";
+                document.getElementById('sys-status').innerHTML = "🟢 Online";
+            } catch(e) { document.getElementById('sys-status').innerHTML = "🔴 Offline"; }
         }
 
-        window.onload = () => {
-            carregarTecnicos();
-            checkStatus();
-            setInterval(checkStatus, 15000);
-        };
+        window.onload = carregarDados;
     </script>
 </body>
 </html>
