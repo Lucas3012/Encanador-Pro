@@ -43,7 +43,7 @@
         <div id="lista-tecnicos"></div>
 
         <div class="secao-titulo">📍 Área de Cobertura:</div>
-        <div id="map" style="height: 200px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #fff;"></div>
+        <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 20px; border: 2px solid #fff;"></div>
 
         <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-top: 20px;">
             <form id="formOrcamento">
@@ -52,27 +52,31 @@
                 <input type="text" id="end" placeholder="Seu Endereço" required>
                 <input type="text" id="serv_display" readonly style="background: #f0f0f0;">
                 <textarea id="msg" placeholder="Detalhes do problema..." rows="3"></textarea>
-                <button type="submit" style="background:#25d366; color: white; font-weight: bold;">SOLICITAR NO WHATSAPP 💬</button>
+                <button type="submit" style="background:#25d366; color: white; font-weight: bold;">CHAMAR NO WHATSAPP 💬</button>
             </form>
         </div>
     </div>
 
     <div id="chat-greeting" onclick="toggleChat()">Olá! 👋 Precisa de ajuda ou orçamento?</div>
     <div id="chat-button" onclick="toggleChat()">💬</div>
+    
     <div id="chat-window">
-        <div class="chat-header"><span>Assistente Pro</span><span onclick="toggleChat()" style="cursor:pointer">×</span></div>
+        <div class="chat-header">
+            <span>Assistente Pro</span>
+            <span onclick="toggleChat()" style="cursor:pointer; font-size: 24px;">&times;</span>
+        </div>
         <div class="chat-messages" id="chat-content">
-            <div class="msg-bot">Olá! Sou o assistente virtual. Se precisar que um técnico te ligue, basta digitar seu número!</div>
+            <div class="msg-bot">Olá! Sou o assistente virtual. Se precisar que um técnico te ligue, digite seu número!</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="user-msg" placeholder="Sua dúvida ou telefone...">
-            <button onclick="enviarDuvida()">></button>
+            <input type="text" id="user-msg" placeholder="Dúvida ou WhatsApp...">
+            <button onclick="enviarDuvida()">➤</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_BASE = "https://nextel-imposed-payday-shall.trycloudflare.com";
+        const API_BASE = "https://want-sat-sig-specialists.trycloudflare.com";
         const WHATS_GESTOR = "5573988478170";
 
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
@@ -83,30 +87,51 @@
             s.style.width = s.style.width === "250px" ? "0" : "250px";
         }
 
-        async function abrirPix(servico) {
-            const idLimpo = Math.floor(1000 + Math.random() * 9000).toString();
-            Swal.fire({
-                title: 'Reserva de Atendimento',
-                html: `<p>ID do Pedido: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><p>Aguarde nesta tela após o pagamento.</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX" style="margin:15px;">`,
-                showConfirmButton: false, allowOutsideClick: false
-            });
-
-            try {
-                await fetch(`${API_BASE}/api/registrar-id`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id_visto: idLimpo, servico: servico }) });
-                const check = setInterval(async () => {
-                    const res = await fetch(`${API_BASE}/api/status/${idLimpo}`);
-                    const data = await res.json();
-                    if(data.status === 'liberado') { clearInterval(check); Swal.close(); document.getElementById('form-container').style.display='block'; document.getElementById('serv_display').value=servico; }
-                }, 3000);
-            } catch(e) {}
-        }
-
-        // INTELIGÊNCIA DO CHATBOT
         function toggleChat() {
             const w = document.getElementById('chat-window');
             const g = document.getElementById('chat-greeting');
             w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
             g.style.display = 'none';
+        }
+
+        async function checkStatus() {
+            const statusText = document.getElementById('sys-status');
+            try {
+                const res = await fetch(`${API_BASE}/api/aprovados`);
+                if(res.ok) {
+                    statusText.innerHTML = '<span class="dot online"></span> Sistema Online';
+                }
+            } catch (e) {
+                statusText.innerHTML = '<span class="dot offline"></span> Servidor Offline';
+            }
+        }
+
+        async function abrirPix(servico) {
+            const idLimpo = Math.floor(1000 + Math.random() * 9000).toString();
+            Swal.fire({
+                title: 'Reserva de Atendimento',
+                html: `<p>ID: <b style="color:red; font-size:22px;">#${idLimpo}</b></p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX" style="margin:15px;">`,
+                showConfirmButton: false
+            });
+
+            try {
+                await fetch(`${API_BASE}/api/registrar-id`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ id_visto: idLimpo, servico: servico }) 
+                });
+                
+                const check = setInterval(async () => {
+                    const res = await fetch(`${API_BASE}/api/status/${idLimpo}`);
+                    const data = await res.json();
+                    if(data.status === 'liberado') { 
+                        clearInterval(check); 
+                        Swal.close(); 
+                        document.getElementById('form-container').style.display='block'; 
+                        document.getElementById('serv_display').value=servico; 
+                    }
+                }, 3000);
+            } catch(e) {}
         }
 
         function adicionarMsg(t, cl) {
@@ -122,14 +147,14 @@
             adicionarMsg(i.value, 'msg-user'); i.value = '';
 
             setTimeout(async () => {
-                let r = "Para orçamentos urgentes, use os botões da página inicial!";
-                
-                // Detecta se é um telefone
+                let r = "Para orçamentos, fale conosco no WhatsApp!";
                 if (m.length >= 8 && !isNaN(m.replace(/\D/g,''))) {
-                    r = "Recebi seu número! ✅ O técnico entrará em contato em instantes.";
-                    await fetch(`${API_BASE}/api/contato-chatbot`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telefone: m }) });
-                } else if(m.includes('valor') || m.includes('preço')) {
-                    r = "A taxa de visita é fixa para Itabuna. O serviço completo é avaliado na hora. Deixe seu WhatsApp para agendar!";
+                    r = "Recebi seu número! ✅ O técnico entrará em contato.";
+                    await fetch(`${API_BASE}/api/contato-chatbot`, { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ telefone: m }) 
+                    });
                 }
                 adicionarMsg(r, 'msg-bot');
             }, 1000);
@@ -139,12 +164,19 @@
             try {
                 const res = await fetch(`${API_BASE}/api/aprovados`);
                 const dados = await res.json();
-                document.getElementById('lista-tecnicos').innerHTML = dados.map(t => `<div class="card-tecnico"><div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div><a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a></div>`).join('');
+                document.getElementById('lista-tecnicos').innerHTML = dados.map(t => `
+                    <div class="card-tecnico">
+                        <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
+                        <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
+                    </div>
+                `).join('');
             } catch(e) {}
         }
 
         window.onload = () => {
             carregarTecnicos();
+            checkStatus();
+            setInterval(checkStatus, 10000);
             setTimeout(() => { document.getElementById('chat-greeting').style.display = 'block'; }, 4000);
         };
     </script>

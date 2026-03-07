@@ -3,15 +3,13 @@
     --secondary: #25d366;
     --dark: #333;
     --white: #ffffff;
+    --bg-light: #f4f7f6;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
 
 body { 
-    background-image: url('fundo-banheiro.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-color: var(--bg-light);
     color: var(--dark); 
 }
 
@@ -23,78 +21,88 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    position: sticky; top: 0; z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .logo-centralizado {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    flex: 1;
-    margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; font-size: 19px; font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    flex: 1; margin: 0; text-align: center;
 }
 
 .drop-icon {
-    font-size: 24px;
-    filter: drop-shadow(0 0 5px rgba(255,255,255,0.4));
+    font-size: 22px;
     animation: drip 2s infinite ease-in-out;
 }
 
 @keyframes drip {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.2); }
 }
 
 .menu-icon { font-size: 24px; cursor: pointer; }
 
-/* CONTAINER TRANSLÚCIDO */
-.container { 
-    background-color: rgba(255, 255, 255, 0.92); 
-    padding: 20px; 
-    max-width: 480px; 
-    margin: 20px auto; 
-    border-radius: 20px; 
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+/* BARRA DE STATUS */
+.status-bar { 
+    background: #e9ecef; padding: 6px 15px; font-size: 11px; 
+    display: flex; justify-content: space-between; align-items: center; 
 }
-
-/* STATUS BAR */
-.status-bar { background: rgba(233, 236, 239, 0.9); padding: 8px 15px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
 .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
 .online { background-color: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
 .offline { background-color: #dc3545; }
 
-/* SIDEBAR */
-.sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: var(--dark); overflow-x: hidden; transition: 0.3s; padding-top: 60px; }
-.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
-.sidebar .close-btn { position: absolute; top: 10px; right: 25px; font-size: 36px; }
+/* CONTAINER PRINCIPAL */
+.container { 
+    padding: 20px; max-width: 500px; margin: 0 auto;
+}
 
-/* SERVIÇOS */
-.servicos-destaque { display: flex; justify-content: space-around; margin: 20px 0; }
+/* CARDS E SERVIÇOS */
+.servicos-destaque { display: flex; justify-content: space-around; margin-bottom: 25px; }
 .circulo-servico { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 12px; font-weight: bold; }
-.icone-bola { width: 60px; height: 60px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 5px; border: 2px solid var(--primary); }
+.icone-bola { width: 65px; height: 65px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--primary); margin-bottom: 8px; }
 
-/* CARDS TÉCNICOS */
-.card-tecnico { background: var(--white); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.tecnico-info b { display: block; font-size: 14px; }
-.tecnico-info span { font-size: 11px; color: #666; }
-.btn-whats-tecnico { text-decoration: none; font-size: 20px; }
+.card-tecnico { background: white; border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.btn-whats-tecnico { text-decoration: none; font-size: 22px; }
 
-/* CHATBOT */
-#chat-button { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-#chat-greeting { position: fixed; bottom: 90px; right: 25px; background: white; padding: 12px; border-radius: 15px 15px 0 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size: 13px; z-index: 2900; display: none; border: 1px solid #eee; animation: bounceIn 0.8s ease; }
-#chat-window { position: fixed; bottom: 90px; right: 20px; width: 280px; height: 380px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 3000; box-shadow: 0 5px 25px rgba(0,0,0,0.2); overflow: hidden; }
+/* CHATBOT PREMIUM */
+#chat-button {
+    position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--primary), #0056b3);
+    color: white; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 28px;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(0,123,255,0.4); z-index: 3000;
+}
+
+#chat-greeting {
+    position: fixed; bottom: 95px; right: 25px; 
+    background: white; padding: 12px 18px; border-radius: 18px 18px 2px 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1); font-size: 14px; z-index: 2900; display: none;
+}
+
+#chat-window {
+    position: fixed; bottom: 90px; right: 20px; width: 320px; height: 450px;
+    background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: none; flex-direction: column; z-index: 3000; overflow: hidden;
+}
+
+.chat-header { background: var(--primary); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+.chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f8f9fa; display: flex; flex-direction: column; gap: 10px; }
+.msg-bot { background: white; padding: 10px; border-radius: 12px 12px 12px 2px; align-self: flex-start; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-width: 85%; }
+.msg-user { background: var(--primary); color: white; padding: 10px; border-radius: 12px 12px 2px 12px; align-self: flex-end; font-size: 14px; max-width: 85%; }
+
+.chat-input-area { display: flex; padding: 12px; background: white; border-top: 1px solid #eee; gap: 5px; }
+.chat-input-area input { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
+.chat-input-area button { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; }
 
 /* FORMULÁRIOS */
-input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; }
-button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; }
+input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; }
+button { width: 100%; padding: 15px; border: none; border-radius: 10px; cursor: pointer; }
+.secao-titulo { font-weight: bold; margin: 20px 0 10px 0; font-size: 13px; color: var(--primary); text-transform: uppercase; }
 
-.secao-titulo { font-weight: bold; margin: 15px 0 10px 0; font-size: 14px; color: var(--primary); text-transform: uppercase; }
+/* SIDEBAR */
+.sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: var(--dark); overflow-x: hidden; transition: 0.3s; padding-top: 60px; }
+.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #ccc; display: block; }
+.sidebar .close-btn { position: absolute; top: 10px; right: 25px; font-size: 36px; color: white; }
