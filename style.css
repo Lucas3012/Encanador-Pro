@@ -169,3 +169,31 @@ button {
     font-weight: bold;
     cursor: pointer;
 }
+/* CONTAINER DA GRADE DE FOTOS */
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Cria colunas automáticas */
+    gap: 12px; /* Espaço entre as fotos */
+    padding: 10px 0;
+}
+
+/* CADA ITEM DA FOTO */
+.foto-item {
+    aspect-ratio: 1 / 1; /* Faz a foto ser sempre um quadrado perfeito */
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 3px solid white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.foto-item:hover {
+    transform: scale(1.05); /* Efeito de zoom ao tocar/passar o mouse */
+}
+
+.foto-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Faz a imagem preencher o quadrado sem distorcer */
+}
