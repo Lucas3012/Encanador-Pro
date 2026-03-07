@@ -3,18 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin</title>
+    <title>Admin - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span>Painel de Controle</span>
-    </div>
-    <div id="mySidebar" class="sidebar">
-        <span class="close-btn" onclick="toggleNav()">&times;</span>
-        <a href="index.html">Sair</a>
-    </div>
+    <div class="header"><span>Painel Admin</span></div>
 
     <div class="container" id="login">
         <h1>🔐 Login</h1>
@@ -24,46 +17,43 @@
     </div>
 
     <div class="container" id="painel" style="display:none;">
-        <h2>🕵️ Moderação de Fotos</h2>
-        <div id="pendentes" class="grid"></div>
-        <hr>
-        <h2>📋 Pedidos Recebidos</h2>
-        <table id="lista-pedidos"></table>
+        <h2>Pedidos e Pix</h2>
+        <table id="tabela"></table>
     </div>
 
     <script>
-        const API_BASE = "https://reading-election-politicians-depot.trycloudflare.com";
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
+        const API_BASE = "https://toolbar-bodies-isolation-gorgeous.trycloudflare.com";
         async function logar() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
             const res = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
             if(res.ok) { document.getElementById('login').style.display='none'; document.getElementById('painel').style.display='block'; atualizar(); }
         }
+
         async function atualizar() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            const resF = await fetch(`${API_BASE}/api/admin/pendentes?user=${u}&pass=${p}`);
-            const fotos = await resF.json();
-            document.getElementById('pendentes').innerHTML = fotos.map(f => `
-                <div class="card">
-                    <img src="${API_BASE}/temp_galeria/${f}">
-                    <button style="background:green" onclick="decidir('${f}','aprovar')">Sim</button>
-                    <button style="background:red" onclick="decidir('${f}','reprovar')">Não</button>
-                </div>
+            const res = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
+            const pedidos = await res.json();
+            
+            document.getElementById('tabela').innerHTML = `<tr><th>Data</th><th>Status/Nome</th><th>Ação</th></tr>` + 
+            pedidos.reverse().map(pd => `
+                <tr style="${pd.status === 'pendente' ? 'background:#fff3cd' : ''}">
+                    <td>${pd.data}</td>
+                    <td>${pd.status === 'pendente' ? '🚨 AGUARDANDO PIX' : pd.nome}</td>
+                    <td>
+                        ${pd.status === 'pendente' ? 
+                        `<button onclick="liberar('${pd.id}')" style="background:blue;color:white;border-radius:5px;">Validar Pix</button>` : 
+                        `<a href="https://wa.me/5573988478170">WhatsApp</a>`}
+                    </td>
+                </tr>
             `).join('');
-
-            const resP = await fetch(`${API_BASE}/admin/pedidos?user=${u}&pass=${p}`);
-            const ped = await resP.json();
-            document.getElementById('lista-pedidos').innerHTML = ped.reverse().map(i => `<tr><td>${i.nome}</td><td><a href="https://wa.me/5573988478170">Ver</a></td></tr>`).join('');
         }
-        async function decidir(foto, acao) {
+
+        async function liberar(id) {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
-            await fetch(`${API_BASE}/api/admin/decidir`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user, pass, foto, acao }) });
+            await fetch(`${API_BASE}/api/admin/liberar`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user, pass, id}) });
             atualizar();
         }
     </script>

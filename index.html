@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encanador Pro - Início</title>
+    <title>Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .pix-code { color: #00f2ff; text-shadow: 0 0 5px #00f2ff; font-family: monospace; background: #111; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 11px; display: block; margin: 10px 0; border: 1px solid #00f2ff; }
+        #form-container { display: none; margin-top: 20px; border: 2px solid #28a745; padding: 15px; border-radius: 10px; }
+    </style>
 </head>
 <body>
-
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span style="font-weight: bold; font-size: 20px;">Encanador Pro</span>
+        <span>Encanador Pro</span>
     </div>
 
     <div id="mySidebar" class="sidebar">
@@ -23,78 +27,68 @@
     </div>
 
     <div class="container">
-        <h1>🛠️ Encanador Pro</h1>
-        <p style="text-align:center; color: #666;">Serviços hidráulicos de qualidade na sua região.</p>
-
+        <h1>🛠️ Serviços</h1>
         <div class="servicos-destaque">
-            <div class="circulo-servico" onclick="selecionarServico('Vazamento')">
-                <div class="icone-bola">💧</div>
-                <span>Vazamento</span>
-            </div>
-            <div class="circulo-servico" onclick="selecionarServico('Reparo')">
-                <div class="icone-bola">🛠️</div>
-                <span>Reparo</span>
-            </div>
-            <div class="circulo-servico" onclick="selecionarServico('Desentupimento')">
-                <div class="icone-bola">🚽</div>
-                <span>Desentupimento</span>
-            </div>
+            <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Desentupimento</span></div>
         </div>
 
-        <form id="formOrcamento">
-            <h2 style="font-size: 1.2rem;">Peça seu Orçamento</h2>
-            <input type="text" id="nome" placeholder="Seu Nome" required>
-            <input type="text" id="endereco" placeholder="Endereço (Bairro/Rua)" required>
-            <input type="text" id="servico" placeholder="Qual o problema?" required>
-            <textarea id="mensagem" placeholder="Detalhes adicionais (opcional)" rows="3"></textarea>
-            <button type="submit">Enviar Solicitação</button>
-        </form>
+        <div id="form-container">
+            <form id="formOrcamento">
+                <h2 style="color:#28a745">✅ Liberado!</h2>
+                <input type="text" id="nome" placeholder="Seu Nome" required>
+                <input type="text" id="endereco" placeholder="Endereço Completo" required>
+                <input type="text" id="servico_display" readonly>
+                <textarea id="mensagem" placeholder="Detalhes..."></textarea>
+                <button type="submit">Finalizar Pedido</button>
+            </form>
+        </div>
     </div>
 
-    <a href="https://wa.me/5573988478170?text=Olá! Gostaria de um orçamento." class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-    </a>
-
     <script>
-        const API_BASE = "https://reading-election-politicians-depot.trycloudflare.com";
+        const API_BASE = "https://toolbar-bodies-isolation-gorgeous.trycloudflare.com";
+        let idSessao = "";
 
-        // Função para abrir/fechar o menu
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
+
+        async function abrirPix(servico) {
+            const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
+            Swal.fire({
+                title: 'Pagamento de Reserva',
+                html: `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}"><br><span class="pix-code">${pix}</span><input id="swal-input" class="swal2-input" placeholder="Cód. Comprovante">`,
+                confirmButtonText: 'Validar',
+                preConfirm: () => document.getElementById('swal-input').value
+            }).then(async (r) => {
+                if(r.isConfirmed && r.value) {
+                    const res = await fetch(`${API_BASE}/api/verificar-pix`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({codigo:r.value, servico}) });
+                    const d = await res.json();
+                    idSessao = d.id;
+                    Swal.fire({ title:'Validando...', text:'Aguarde a liberação do Admin.', allowOutsideClick:false, didOpen:()=>Swal.showLoading() });
+                    checarStatus(servico);
+                }
+            });
         }
 
-        // Função para preencher o campo de serviço ao clicar no ícone
-        function selecionarServico(nome) {
-            document.getElementById('servico').value = nome;
-            document.getElementById('servico').focus();
+        function checarStatus(servico) {
+            const intv = setInterval(async () => {
+                const res = await fetch(`${API_BASE}/api/status/${idSessao}`);
+                const d = await res.json();
+                if(d.status === 'liberado') {
+                    clearInterval(intv);
+                    Swal.close();
+                    document.getElementById('form-container').style.display='block';
+                    document.getElementById('servico_display').value = servico;
+                }
+            }, 3000);
         }
 
-        // Envio do formulário
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = {
-                nome: document.getElementById('nome').value,
-                endereco: document.getElementById('endereco').value,
-                servico: document.getElementById('servico').value,
-                mensagem: document.getElementById('mensagem').value
-            };
-
-            try {
-                const res = await fetch(`${API_BASE}/orcamento`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(dados)
-                });
-                if(res.ok) {
-                    alert('Pedido enviado! Entraremos em contato em breve.');
-                    e.target.reset();
-                } else {
-                    alert('Erro ao enviar. Tente novamente.');
-                }
-            } catch (err) {
-                alert('Servidor offline. Tente mais tarde.');
-            }
+            const dados = { id_sessao: idSessao, nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, mensagem: document.getElementById('mensagem').value };
+            await fetch(`${API_BASE}/orcamento`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dados) });
+            alert("Sucesso! Aguarde contato.");
+            location.reload();
         };
     </script>
 </body>

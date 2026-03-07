@@ -21,45 +21,59 @@ if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ pedidos:
 
 const upload = multer({ dest: path.join(__dirname, 'temp_galeria/') });
 
-// ROTA: Cliente envia foto
-app.post('/api/upload', upload.single('foto'), (req, res) => {
-    res.json({ message: "Foto em moderação!" });
-});
+// --- ROTAS PIX & STATUS ---
 
-// ROTA: Listar fotos oficiais
-app.get('/api/fotos', (req, res) => {
-    const pasta = path.join(__dirname, 'galeria');
-    fs.readdir(pasta, (err, files) => {
-        const imagens = (files || []).filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f));
-        res.json(imagens);
+app.post('/api/verificar-pix', (req, res) => {
+    const { codigo, servico } = req.body;
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    const novoId = Date.now().toString();
+    
+    db.pedidos.push({
+        id: novoId,
+        data: new Date().toLocaleString('pt-BR'),
+        nome: "Aguardando Pix...",
+        servico: servico,
+        codigo_pix: codigo,
+        status: "pendente"
     });
+    
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ id: novoId });
 });
 
-// ROTA: Admin decide (Aprovar/Reprovar)
-app.post('/api/admin/decidir', (req, res) => {
-    const { user, pass, foto, acao } = req.body;
+app.get('/api/status/:id', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    const pedido = db.pedidos.find(p => p.id === req.params.id);
+    res.json({ status: pedido ? pedido.status : 'nao_encontrado' });
+});
+
+app.post('/api/admin/liberar', (req, res) => {
+    const { user, pass, id } = req.body;
     if (user !== ADMIN_USER || pass !== ADMIN_PASS) return res.status(401).send("Negado");
-    const camTemp = path.join(__dirname, 'temp_galeria', foto);
-    if (acao === 'aprovar') {
-        fs.renameSync(camTemp, path.join(__dirname, 'galeria', `aprovada_${Date.now()}.jpg`));
-    } else { if (fs.existsSync(camTemp)) fs.unlinkSync(camTemp); }
-    res.json({ message: "OK" });
+    
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    const idx = db.pedidos.findIndex(p => p.id === id);
+    if (idx !== -1) {
+        db.pedidos[idx].status = "liberado";
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        res.json({ message: "Liberado" });
+    } else { res.status(404).send("Erro"); }
 });
 
-// ROTA: Admin ver pendentes
-app.get('/api/admin/pendentes', (req, res) => {
-    const { user, pass } = req.query;
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        fs.readdir(path.join(__dirname, 'temp_galeria'), (err, files) => res.json(files || []));
-    } else { res.status(401).send("Negado"); }
-});
+// --- ROTAS GERAIS ---
 
-// ROTA: Pedidos
 app.post('/orcamento', (req, res) => {
-    const data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-    data.pedidos.push({ id: Date.now(), data: new Date().toLocaleString('pt-BR'), ...req.body });
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-    res.json({ message: "OK" });
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    const idx = db.pedidos.findIndex(p => p.id === req.body.id_sessao);
+    
+    if (idx !== -1) {
+        db.pedidos[idx].nome = req.body.nome;
+        db.pedidos[idx].endereco = req.body.endereco;
+        db.pedidos[idx].mensagem = req.body.mensagem;
+        db.pedidos[idx].status = "concluido";
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        res.json({ message: "OK" });
+    } else { res.status(400).send("Sessão inválida"); }
 });
 
 app.get('/admin/pedidos', (req, res) => {
@@ -69,4 +83,4 @@ app.get('/admin/pedidos', (req, res) => {
     } else { res.status(401).send("Negado"); }
 });
 
-app.listen(3000, () => console.log('🚀 Servidor Online na 3000'));
+app.listen(3000, () => console.log('🚀 Servidor Rodando na Porta 3000'));
