@@ -2,31 +2,46 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria</title>
+    <title>Galeria Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Galeria Pro</b></div>
-    <div class="container" id="fotos-container"></div>
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <b>Galeria de Serviços</b>
+    </div>
+
+    <div class="container">
+        <div id="fotos-container" class="galeria-grid">
+            </div>
+    </div>
     
     <div class="fab-container">
-        <button class="fab" style="background:var(--primary)" onclick="document.getElementById('f').click()">+</button>
-        <button class="fab" style="background:#25d366" onclick="window.open('https://wa.me/5573988478170')">💬</button>
+        <button class="fab btn-upload" onclick="document.getElementById('fileInput').click()">+</button>
+        <button class="fab btn-whatsapp" onclick="window.open('https://wa.me/5573988478170')">💬</button>
     </div>
-    <input type="file" id="f" style="display:none" onchange="subir(this)">
+    <input type="file" id="fileInput" style="display:none" onchange="subirFoto(this)">
 
     <script>
-        async function carregar() {
+        function toggleNav() { /* função de abrir sidebar */ }
+
+        async function carregarGaleria() {
             const res = await fetch('http://localhost:3000/api/galeria');
             const fotos = await res.json();
-            document.getElementById('fotos-container').innerHTML = fotos.map(f => `<img src="http://localhost:3000/fotos/${f}" style="width:100%; border-radius:10px; margin-bottom:10px;">`).join('');
+            const container = document.getElementById('fotos-container');
+            container.innerHTML = fotos.map(f => `
+                <img src="http://localhost:3000/fotos/${f}" alt="Trabalho Realizado">
+            `).join('');
         }
-        async function subir(i) {
-            const fd = new FormData(); fd.append('foto', i.files[0]);
-            await fetch('http://localhost:3000/api/upload-galeria', { method:'POST', body:fd });
-            alert("Enviado para aprovação!");
+
+        async function subirFoto(input) {
+            const formData = new FormData();
+            formData.append('foto', input.files[0]);
+            await fetch('http://localhost:3000/api/upload-galeria', { method:'POST', body:formData });
+            alert("Sua foto foi enviada para o mestre aprovar!");
         }
-        carregar();
+
+        carregarGaleria();
     </script>
 </body>
 </html>

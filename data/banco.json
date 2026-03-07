@@ -4,6 +4,11 @@
       "id_visto": "4318",
       "servico": "Vazamento",
       "status": "pendente"
+    },
+    {
+      "id_visto": "8903",
+      "servico": "Vazamento",
+      "status": "liberado"
     }
   ],
   "colaboradores": []
