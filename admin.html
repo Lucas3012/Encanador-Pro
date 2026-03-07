@@ -3,99 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Gestor</title>
+    <title>Admin Rápido</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">Painel Administrativo</div>
-
-    <div id="login-container" class="container">
-        <h2>Acesso Restrito</h2>
-        <input type="text" id="user" placeholder="Usuário">
-        <input type="password" id="pass" placeholder="Senha">
-        <button onclick="logar()">Entrar</button>
-    </div>
-
-    <div id="painel" style="display:none;">
-        <div class="admin-tabs">
-            <button class="tab-btn active" onclick="mudarAba('aba-pedidos', this)">📋 Pedidos</button>
-            <button class="tab-btn" onclick="mudarAba('aba-galeria', this)">📸 Galeria</button>
-            <button class="tab-btn" onclick="mudarAba('aba-colabs', this)">👷 Colabs</button>
-        </div>
-
-        <div id="aba-pedidos" class="container" style="display:block;">
-            <h2>Validação de PIX</h2>
-            <div id="lista-pedidos">Carregando...</div>
-        </div>
-
-        <div id="aba-galeria" class="container" style="display:none;">
-            <h2>Fotos Pendentes</h2>
-            <div id="lista-fotos" class="grid"></div>
-        </div>
-
-        <div id="aba-colabs" class="container" style="display:none;">
-            <h2>Novos Candidatos</h2>
-            <div id="lista-colabs"></div>
-        </div>
+    <div class="header"><span>Painel do Mestre</span></div>
+    <div class="container">
+        <h2 style="text-align: center;">Validar Código</h2>
+        <input type="number" id="codigoInput" placeholder="4 Dígitos" style="font-size: 30px; text-align: center;">
+        <button onclick="validarAgora()" style="background: #25d366;">✅ LIBERAR AGORA</button>
+        <div id="resultado" style="margin-top: 20px; text-align: center; font-weight: bold;"></div>
     </div>
 
     <script>
-        const API = "http://localhost:3000";
-        let creds = { user: "", pass: "" };
-
-        function mudarAba(id, btn) {
-            document.querySelectorAll('.container').forEach(c => { if(c.id !== 'login-container') c.style.display = 'none'; });
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).style.display = 'block';
-            btn.classList.add('active');
-            atualizarTudo();
-        }
-
-        async function logar() {
-            creds.user = document.getElementById('user').value;
-            creds.pass = document.getElementById('pass').value;
-            const res = await fetch(`${API}/admin/pedidos?user=${creds.user}&pass=${creds.pass}`);
-            if(res.ok) {
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('painel').style.display = 'block';
-                atualizarTudo();
-            } else { alert("Senha incorreta!"); }
-        }
-
-        async function atualizarTudo() {
-            const params = `?user=${creds.user}&pass=${creds.pass}`;
-            
-            // Pedidos
-            const p = await (await fetch(`${API}/admin/pedidos${params}`)).json();
-            document.getElementById('lista-pedidos').innerHTML = `<table>` + p.map(x => `
-                <tr><td>${x.data}<br><strong>${x.nome}</strong></td><td><button onclick="liberar('${x.id}')">LIBERAR</button></td></tr>
-            `).join('') + `</table>`;
-
-            // Galeria
-            const g = await (await fetch(`${API}/api/admin/pendentes${params}`)).json();
-            document.getElementById('lista-fotos').innerHTML = g.map(f => `
-                <div class="card"><img src="${API}/temp_galeria/${f}">
-                <button onclick="decidir('${f}','aprovar')" style="background:green">✅</button>
-                <button onclick="decidir('${f}','reprovar')" style="background:red">❌</button></div>
-            `).join('');
-
-            // Colaboradores
-            const c = await (await fetch(`${API}/api/admin/colaboradores${params}`)).json();
-            document.getElementById('lista-colabs').innerHTML = c.map(colab => `
-                <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">
-                    <strong>${colab.nome}</strong> (${colab.especialidade})<br>
-                    <a href="https://wa.me/55${colab.telefone}">Chamar no WhatsApp</a>
-                </div>
-            `).join('');
-        }
-
-        async function decidir(foto, acao) {
-            await fetch(`${API}/api/admin/decidir`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({...creds, foto, acao})
+        async function validarAgora() {
+            const cod = document.getElementById('codigoInput').value;
+            const res = await fetch(`http://localhost:3000/api/admin/liberar-por-id`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id_visto: cod })
             });
-            atualizarTudo();
+            const resDiv = document.getElementById('resultado');
+            if(res.ok) {
+                resDiv.innerHTML = `✅ Código #${cod} LIBERADO!`;
+                resDiv.style.color = "green";
+                document.getElementById('codigoInput').value = "";
+            } else {
+                resDiv.innerHTML = "❌ Código não encontrado.";
+                resDiv.style.color = "red";
+            }
         }
     </script>
 </body>

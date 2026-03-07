@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
     <div class="header">
         <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
         <span style="font-weight: bold;">Encanador Pro</span>
@@ -17,45 +16,41 @@
     <div id="mySidebar" class="sidebar">
         <span class="close-btn" onclick="toggleNav()">&times;</span>
         <a href="index.html">Início</a>
-        <a href="galeria.html">Galeria</a>
-        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="historico.html">Histórico</a>
         <a href="admin.html">Painel Admin</a>
     </div>
 
     <div class="container">
-        <h1 style="text-align: center;">🛠️ Nossos Serviços</h1>
-        
+        <h1 style="text-align: center;">🛠️ Serviços</h1>
         <div class="servicos-destaque">
             <div class="circulo-servico" onclick="abrirPix('Vazamento')">
                 <div class="icone-bola">💧</div>
-                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Vazamento</span>
+                <span style="font-size: 12px; font-weight: bold;">Vazamento</span>
             </div>
             <div class="circulo-servico" onclick="abrirPix('Reparo')">
                 <div class="icone-bola">🛠️</div>
-                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Reparo</span>
+                <span style="font-size: 12px; font-weight: bold;">Reparo</span>
             </div>
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
                 <div class="icone-bola">🚽</div>
-                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Desentupimento</span>
+                <span style="font-size: 12px; font-weight: bold;">Desentupimento</span>
             </div>
         </div>
 
-        <div id="form-container">
+        <div id="form-container" style="display: none;">
             <form id="formOrcamento">
-                <h3 style="color: #28a745; text-align: center; margin-bottom: 10px;">✅ Pagamento Validado!</h3>
+                <h3 style="color: #25d366; text-align: center;">✅ Liberado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="endereco" placeholder="Endereço Completo" required>
+                <input type="text" id="endereco" placeholder="Endereço" required>
                 <input type="text" id="servico_display" readonly>
-                <textarea id="mensagem" placeholder="Detalhes do problema..." rows="3"></textarea>
-                <button type="submit">Enviar Solicitação Final</button>
+                <textarea id="mensagem" placeholder="Detalhes..." rows="3"></textarea>
+                <button type="submit" style="background: #25d366;">Enviar via WhatsApp 💬</button>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://weights-brothers-first-bristol.trycloudflare.com";
-        let idSessao = "";
+        const API_BASE = "https://probability-quizzes-cars-convention.trycloudflare.com";
+        let idGerado = "";
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
@@ -63,57 +58,40 @@
         }
 
         async function abrirPix(servico) {
-            const idPedidoAleatorio = Math.floor(1000 + Math.random() * 9000);
+            idGerado = Math.floor(1000 + Math.random() * 9000).toString(); // Gera ID de 4 dígitos
             const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
             
             Swal.fire({
-                title: 'Reserva de Atendimento',
-                html: `
-                    <p>ID DO PEDIDO:</p>
-                    <span class="pedido-id-neon">#${idPedidoAleatorio}</span>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px; border: 2px solid #00f2ff; border-radius: 10px;">
-                    <span class="pix-code" id="pixTxt">${pix}</span>
-                    <button onclick="navigator.clipboard.writeText('${pix}'); alert('Código Copiado!')" style="background:#00f2ff; color:#000; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; margin-bottom:10px;">Copiar Pix</button>
-                    <input id="swal-input-cod" class="swal2-input" placeholder="Cole o código do comprovante">
-                `,
-                confirmButtonText: 'Validar Agora',
-                showCancelButton: true,
-                preConfirm: () => document.getElementById('swal-input-cod').value
-            }).then(async (r) => {
-                if(r.isConfirmed && r.value) {
-                    const res = await fetch(`${API_BASE}/api/verificar-pix`, { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({codigo: r.value, servico, id_visto: idPedidoAleatorio}) 
-                    });
-                    const d = await res.json();
-                    idSessao = d.id;
-                    
-                    Swal.fire({ title: 'Validando...', html: `Aguardando Admin para o Pedido <b>#${idPedidoAleatorio}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    checarStatus(servico);
-                }
+                title: 'Reserva',
+                html: `<p>INFORME ESTE CÓDIGO:</p><span class="pedido-id-neon">#${idGerado}</span>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}">
+                <span class="pix-code">${pix}</span>`,
+                allowOutsideClick: false, showConfirmButton: false
             });
+
+            await fetch(`${API_BASE}/api/registrar-id`, { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({id_visto: idGerado, servico}) 
+            });
+            checarStatus(servico);
         }
 
         function checarStatus(servico) {
             const intv = setInterval(async () => {
-                const res = await fetch(`${API_BASE}/api/status/${idSessao}`);
+                const res = await fetch(`${API_BASE}/api/status/${idGerado}`);
                 const d = await res.json();
                 if(d.status === 'liberado') {
-                    clearInterval(intv);
-                    Swal.close();
+                    clearInterval(intv); Swal.close();
                     document.getElementById('form-container').style.display = 'block';
                     document.getElementById('servico_display').value = servico;
-                    document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
                 }
             }, 3000);
         }
 
-        document.getElementById('formOrcamento').onsubmit = async (e) => {
+        document.getElementById('formOrcamento').onsubmit = (e) => {
             e.preventDefault();
-            const dados = { id_sessao: idSessao, nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, mensagem: document.getElementById('mensagem').value };
-            await fetch(`${API_BASE}/orcamento`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
-            Swal.fire('Sucesso!', 'Seu pedido foi enviado.', 'success').then(() => location.reload());
+            const texto = `*Pedido #${idGerado}*%0A*Nome:* ${document.getElementById('nome').value}%0A*Endereço:* ${document.getElementById('endereco').value}`;
+            window.open(`https://wa.me/5573988478170?text=${texto}`, '_blank');
         };
     </script>
 </body>

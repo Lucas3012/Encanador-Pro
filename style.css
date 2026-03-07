@@ -7,135 +7,24 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); overflow-x: hidden; }
 
-body { 
-    font-family: 'Segoe UI', sans-serif; 
-    background: var(--bg); 
-    overflow-x: hidden; 
-}
+/* HEADER E SIDEBAR */
+.header { background: var(--primary); color: white; padding: 15px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; }
+.menu-icon { font-size: 24px; cursor: pointer; margin-right: 15px; }
+.sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.4s; padding-top: 60px; }
+.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
 
-/* HEADER FIXO */
-.header { 
-    background: var(--primary); 
-    color: white; 
-    padding: 15px; 
-    display: flex; 
-    align-items: center; 
-    position: sticky; 
-    top: 0; 
-    z-index: 1000; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
+/* SERVIÇOS EM CÍRCULOS */
+.servicos-destaque { display: flex; justify-content: space-around; align-items: center; margin: 25px 0; text-align: center; }
+.circulo-servico { display: flex; flex-direction: column; align-items: center; width: 30%; cursor: pointer; }
+.icone-bola { width: 70px; height: 70px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-.menu-icon { 
-    font-size: 24px; 
-    cursor: pointer; 
-    margin-right: 15px; 
-}
+/* ESTILO NEON */
+.pedido-id-neon { display: block; font-size: 28px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); text-align: center; margin: 10px 0; letter-spacing: 3px; }
+.pix-code { color: var(--neon-blue); background: #111; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 11px; display: block; margin: 10px 0; }
 
-/* SIDEBAR (MENU LATERAL) */
-.sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 2000;
-    top: 0;
-    left: 0;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.4s;
-    padding-top: 60px;
-}
-
-.sidebar a {
-    padding: 15px 25px;
-    text-decoration: none;
-    font-size: 18px;
-    color: #818181;
-    display: block;
-    transition: 0.3s;
-}
-
-.sidebar a:hover { color: #f1f1f1; background: #222; }
-.sidebar .close-btn { position: absolute; top: 10px; right: 25px; font-size: 36px; color: white; cursor: pointer; }
-
-/* CONTAINER PRINCIPAL */
-.container { 
-    max-width: 500px; 
-    margin: 20px auto; 
-    background: var(--white); 
-    padding: 20px; 
-    border-radius: 15px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-}
-
-/* SERVIÇOS EM CÍRCULOS (LADO A LADO) */
-.servicos-destaque {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin: 25px 0;
-    text-align: center;
-}
-
-.circulo-servico {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 30%;
-}
-
-.icone-bola {
-    width: 70px;
-    height: 70px;
-    background: white;
-    border: 3px solid var(--primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    margin-bottom: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: 0.3s;
-}
-
-.circulo-servico:hover .icone-bola {
-    transform: scale(1.1);
-    background: var(--primary);
-    color: white;
-}
-
-/* ID PEDIDO NEON */
-.pedido-id-neon {
-    display: block;
-    font-size: 28px;
-    font-weight: bold;
-    color: var(--neon-blue);
-    text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
-    margin: 10px 0;
-    letter-spacing: 3px;
-    text-align: center;
-}
-
-/* PIX COPIA E COLA */
-.pix-code { 
-    color: var(--neon-blue); 
-    text-shadow: 0 0 5px var(--neon-blue); 
-    font-family: monospace; 
-    background: #111; 
-    padding: 10px; 
-    border-radius: 5px; 
-    word-break: break-all; 
-    font-size: 11px; 
-    display: block; 
-    margin: 10px 0; 
-}
-
-/* FORMULÁRIO */
-#form-container { display: none; margin-top: 20px; }
+.container { max-width: 500px; margin: 20px auto; background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
 button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-/* ESCONDE LINKS VAZADOS DA IMAGEM */
 nav, .navbar { display: none !important; }
