@@ -1,55 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trabalhe Conosco</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">Seja um Parceiro</div>
-
+    <div class="header">👷 Parceiros</div>
     <div class="container">
-        <h2>Cadastro de Colaborador</h2>
-        <p>Preencha os dados para entrar na nossa lista de prestadores.</p>
-        
-        <form id="formColab">
-            <input type="text" id="nome" placeholder="Nome Completo" required>
-            <input type="tel" id="telefone" placeholder="WhatsApp (DDD+Número)" required>
-            
-            <select id="especialidade">
-                <option value="Encanador">Encanador</option>
-                <option value="Eletricista">Eletricista</option>
-                <option value="Pedreiro">Pedreiro</option>
-                <option value="Pintor">Pintor</option>
-            </select>
-
-            <textarea id="experiencia" placeholder="Conte um pouco da sua experiência..." rows="4"></textarea>
-            
-            <button type="submit">Enviar Cadastro</button>
+        <form id="fColab">
+            <input type="text" id="n" placeholder="Nome" required>
+            <input type="tel" id="t" placeholder="WhatsApp" required>
+            <select id="fun"><option value="Encanador">Encanador</option><option value="Eletricista">Eletricista</option></select>
+            <textarea id="e" placeholder="Experiência..."></textarea>
+            <button type="submit">Cadastrar</button>
         </form>
     </div>
-
     <script>
-        document.getElementById('formColab').onsubmit = async (e) => {
+        document.getElementById('fColab').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = {
-                nome: document.getElementById('nome').value,
-                telefone: document.getElementById('telefone').value,
-                especialidade: document.getElementById('especialidade').value,
-                experiencia: document.getElementById('experiencia').value
-            };
-
-            const res = await fetch('http://localhost:3000/api/colaborador', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
+            await fetch('http://localhost:3000/api/colaborador', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({nome:document.getElementById('n').value, funcao:document.getElementById('fun').value})
             });
-
-            if(res.ok) {
-                alert("Recebemos seu contato! Entraremos em contato via WhatsApp.");
-                window.location.href = "index.html";
-            }
+            alert("Sucesso!"); location.href="index.html";
         };
     </script>
 </body>

@@ -1,55 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galeria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span>Nossa Galeria</span>
+    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Galeria Pro</b></div>
+    <div class="container" id="fotos-container"></div>
+    
+    <div class="fab-container">
+        <button class="fab" style="background:var(--primary)" onclick="document.getElementById('f').click()">+</button>
+        <button class="fab" style="background:#25d366" onclick="window.open('https://wa.me/5573988478170')">💬</button>
     </div>
-    <div id="mySidebar" class="sidebar">
-        <span class="close-btn" onclick="toggleNav()">&times;</span>
-        <a href="index.html">Início</a>
-        <a href="galeria.html">Galeria</a>
-        <a href="trabalhe-conosco.html">Trabalhe Conosco</a>
-        <a href="historico.html">Histórico</a>
-        <a href="admin.html">Admin</a>
-    </div>
-
-    <div class="container">
-        <h1>📸 Serviços Realizados</h1>
-        <div class="grid" id="lista"></div>
-    </div>
-
-    <label class="upload-float" for="input-foto">+</label>
-    <input type="file" id="input-foto" style="display:none" accept="image/*" onchange="enviarFoto(this)">
-
-    <a href="https://wa.me/5573988478170" class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
-    </a>
+    <input type="file" id="f" style="display:none" onchange="subir(this)">
 
     <script>
-        const API_BASE = "https://strict-portraits-fame-bottle.trycloudflare.com";
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
         async function carregar() {
-            const res = await fetch(`${API_BASE}/api/fotos`);
+            const res = await fetch('http://localhost:3000/api/galeria');
             const fotos = await res.json();
-            document.getElementById('lista').innerHTML = fotos.map(f => `
-                <div class="card"><img src="${API_BASE}/galeria/${f}"><p>Concluído</p></div>
-            `).join('');
+            document.getElementById('fotos-container').innerHTML = fotos.map(f => `<img src="http://localhost:3000/fotos/${f}" style="width:100%; border-radius:10px; margin-bottom:10px;">`).join('');
         }
-        async function enviarFoto(input) {
-            const formData = new FormData();
-            formData.append('foto', input.files[0]);
-            await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
-            alert("Enviada para aprovação!");
+        async function subir(i) {
+            const fd = new FormData(); fd.append('foto', i.files[0]);
+            await fetch('http://localhost:3000/api/upload-galeria', { method:'POST', body:fd });
+            alert("Enviado para aprovação!");
         }
         carregar();
     </script>

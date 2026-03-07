@@ -1,122 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <span style="font-weight: bold;">Encanador Pro</span>
-    </div>
-
+    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Encanador Pro</b></div>
     <div id="mySidebar" class="sidebar">
-        <span class="close-btn" onclick="toggleNav()">&times;</span>
+        <a href="javascript:void(0)" onclick="toggleNav()" style="font-size:30px">×</a>
         <a href="index.html">🏠 Início</a>
-        <a href="galeria.html">📸 Galeria de Fotos</a>
+        <a href="galeria.html">📸 Galeria</a>
         <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
-        <a href="historico.html">📜 Histórico</a>
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
     <div class="container">
-        <h1 style="text-align: center;">🛠️ Serviços</h1>
-        
+        <h2 style="text-align:center">🛠️ Serviços</h2>
         <div class="servicos-destaque">
-            <div class="circulo-servico" onclick="abrirPix('Vazamento')">
-                <div class="icone-bola">💧</div>
-                <span style="font-size: 12px; font-weight: bold;">Vazamento</span>
-            </div>
-            <div class="circulo-servico" onclick="abrirPix('Reparo')">
-                <div class="icone-bola">🛠️</div>
-                <span style="font-size: 12px; font-weight: bold;">Reparo</span>
-            </div>
-            <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
-                <div class="icone-bola">🚽</div>
-                <span style="font-size: 12px; font-weight: bold;">Desentupimento</span>
-            </div>
+            <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
         </div>
-
-        <div id="form-container" style="display: none;">
+        <div id="form-container" style="display:none">
             <form id="formOrcamento">
-                <h3 style="color: #25d366; text-align: center;">✅ Pagamento Validado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="endereco" placeholder="Seu Endereço" required>
-                <input type="text" id="servico_display" readonly>
-                <textarea id="mensagem" placeholder="Diga o que aconteceu..." rows="3"></textarea>
-                <button type="submit" style="background: #25d366;">Enviar via WhatsApp 💬</button>
+                <input type="text" id="end" placeholder="Endereço" required>
+                <input type="text" id="serv_display" readonly>
+                <textarea id="msg" placeholder="Detalhes..."></textarea>
+                <button type="submit" style="background:var(--secondary)">Enviar WhatsApp 💬</button>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://strict-portraits-fame-bottle.trycloudflare.com";
-        let idGerado = "";
-
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            // Se estiver fechado, abre. Se estiver aberto, fecha.
-            if (s.style.width === "250px") {
-                s.style.width = "0";
-            } else {
-                s.style.width = "250px";
-            }
-        }
-
-        async function abrirPix(servico) {
-            idGerado = Math.floor(1000 + Math.random() * 9000).toString();
-            const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
-            
+        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
+        async function abrirPix(s) {
+            const id = Math.floor(1000 + Math.random() * 9000).toString();
+            const pix = "SUA_CHAVE_PIX_AQUI";
             Swal.fire({
-                title: 'Pagamento de Reserva',
-                html: `
-                    <p>INFORME ESTE CÓDIGO:</p>
-                    <span class="pedido-id-neon">#${idGerado}</span>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px;">
-                    <span class="pix-code">${pix}</span>
-                    <p style="font-size: 11px; color: #666;">O formulário será liberado após a validação.</p>
-                `,
-                allowOutsideClick: false,
-                showConfirmButton: false
+                title: 'Reserva',
+                html: `<span class="pedido-id-neon">#${id}</span><img src="https://api.qrserver.com/v1/create-qr-code/?data=${pix}"><span class="pix-code">${pix}</span>`,
+                allowOutsideClick: false, showConfirmButton: false
             });
-
-            await fetch(`${API_BASE}/api/registrar-id`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({id_visto: idGerado, servico}) 
-            });
-
-            checarStatus(servico);
-        }
-
-        function checarStatus(servico) {
-            const intv = setInterval(async () => {
-                const res = await fetch(`${API_BASE}/api/status/${idGerado}`);
+            await fetch('http://localhost:3000/api/registrar-id', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_visto:id, servico:s}) });
+            const timer = setInterval(async () => {
+                const res = await fetch('http://localhost:3000/api/status/'+id);
                 const d = await res.json();
-                if(d.status === 'liberado') {
-                    clearInterval(intv);
-                    Swal.close();
-                    document.getElementById('form-container').style.display = 'block';
-                    document.getElementById('servico_display').value = servico;
-                    document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
-                }
+                if(d.status === 'liberado') { clearInterval(timer); Swal.close(); document.getElementById('form-container').style.display='block'; document.getElementById('serv_display').value=s; }
             }, 3000);
         }
-
-        document.getElementById('formOrcamento').onsubmit = function(e) {
-            e.preventDefault();
-            const nome = document.getElementById('nome').value;
-            const end = document.getElementById('endereco').value;
-            const msg = document.getElementById('mensagem').value;
-            const serv = document.getElementById('servico_display').value;
-            
-            const texto = `*Pedido #${idGerado}*%0A*Serviço:* ${serv}%0A*Nome:* ${nome}%0A*Endereço:* ${end}%0A*Mensagem:* ${msg}`;
-            window.open(`https://wa.me/5573988478170?text=${texto}`, '_blank');
-        };
     </script>
 </body>
 </html>

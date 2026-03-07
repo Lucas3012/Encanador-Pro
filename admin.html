@@ -1,37 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Rápido</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header"><span>Painel do Mestre</span></div>
-    <div class="container">
-        <h2 style="text-align: center;">Validar Código</h2>
-        <input type="number" id="codigoInput" placeholder="4 Dígitos" style="font-size: 30px; text-align: center;">
-        <button onclick="validarAgora()" style="background: #25d366;">✅ LIBERAR AGORA</button>
-        <div id="resultado" style="margin-top: 20px; text-align: center; font-weight: bold;"></div>
+    <div id="login" class="container">
+        <h2>🔐 Admin</h2>
+        <input type="password" id="pw" placeholder="Senha">
+        <button onclick="logar()">Entrar</button>
+    </div>
+
+    <div id="painel" style="display:none">
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="aba('pix', this)">📋 PIX</button>
+            <button class="tab-btn" onclick="aba('gal', this)">📸 GALERIA</button>
+            <button class="tab-btn" onclick="aba('col', this)">👷 COLAB</button>
+        </div>
+
+        <div id="pix" class="admin-section active container">
+            <input type="number" id="idV" placeholder="Código 4 dígitos">
+            <button onclick="liberar()">LIBERAR CLIENTE</button>
+        </div>
+
+        <div id="gal" class="admin-section container">
+            <div id="pendentes"></div>
+        </div>
+
+        <div id="col" class="admin-section container">
+            <div id="colabs"></div>
+        </div>
     </div>
 
     <script>
-        async function validarAgora() {
-            const cod = document.getElementById('codigoInput').value;
-            const res = await fetch(`http://localhost:3000/api/admin/liberar-por-id`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id_visto: cod })
-            });
-            const resDiv = document.getElementById('resultado');
-            if(res.ok) {
-                resDiv.innerHTML = `✅ Código #${cod} LIBERADO!`;
-                resDiv.style.color = "green";
-                document.getElementById('codigoInput').value = "";
-            } else {
-                resDiv.innerHTML = "❌ Código não encontrado.";
-                resDiv.style.color = "red";
-            }
+        function logar() { if(document.getElementById('pw').value==='1234'){ document.getElementById('login').style.display='none'; document.getElementById('painel').style.display='block'; carregarAdmin(); } }
+        function aba(id, btn) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); btn.classList.add('active');
         }
+        async function liberar() {
+            const id = document.getElementById('idV').value;
+            await fetch('http://localhost:3000/api/admin/liberar-por-id', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_visto:id}) });
+            alert("Liberado!");
+        }
+        async function carregarAdmin() {
+            const p = await (await fetch('http://localhost:3000/api/admin/pendentes')).json();
+            document.getElementById('pendentes').innerHTML = p.map(f => `<div><img src="http://localhost:3000/temp/${f}" width="100"><button onclick="decidir('${f}','aprovar')">✅</button></div>`).join('');
+            
+            const c = await (await fetch('http://localhost:3000/api/admin/colaboradores')).json();
+            document.getElementById('colabs').innerHTML = c.map(x => `<p>${x.nome} - ${x.funcao}</p>`).join('');
+        }
+        async function decidir(f, a) { await fetch('http://localhost:3000/api/admin/decidir-foto', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({foto:f, acao:a}) }); carregarAdmin(); }
     </script>
 </body>
 </html>

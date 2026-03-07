@@ -1,69 +1,22 @@
-:root { 
-    --primary: #0056b3; 
-    --secondary: #25d366; 
-    --neon-blue: #00f2ff;
-    --bg: #f4f7f6; 
-    --white: #ffffff;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); overflow-x: hidden; }
-
-/* HEADER */
-.header { 
-    background: var(--primary); 
-    color: white; 
-    padding: 15px; 
-    display: flex; 
-    align-items: center; 
-    position: sticky; 
-    top: 0; 
-    z-index: 1000; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
+:root { --primary: #0056b3; --secondary: #25d366; --neon: #00f2ff; --bg: #f4f7f6; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--bg); color: #333; }
+.header { background: var(--primary); color: white; padding: 15px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; }
 .menu-icon { font-size: 24px; cursor: pointer; margin-right: 15px; }
-
-/* SIDEBAR (MENU LATERAL) - CONFIGURAÇÃO DE VISIBILIDADE */
-.sidebar {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 2000;
-    top: 0;
-    left: 0;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.4s;
-    padding-top: 60px;
-}
-
-.sidebar a {
-    padding: 15px 25px;
-    text-decoration: none;
-    font-size: 18px;
-    color: #bbb;
-    display: block; /* Garante que os links apareçam */
-    transition: 0.3s;
-    border-bottom: 1px solid #222;
-}
-
-.sidebar a:hover { color: var(--neon-blue); background: #222; }
-.sidebar .close-btn { position: absolute; top: 10px; right: 25px; font-size: 36px; color: white; cursor: pointer; }
-
-/* SERVIÇOS EM CÍRCULOS */
-.servicos-destaque { display: flex; justify-content: space-around; align-items: center; margin: 25px 0; text-align: center; }
-.circulo-servico { display: flex; flex-direction: column; align-items: center; width: 30%; cursor: pointer; }
-.icone-bola { 
-    width: 70px; height: 70px; background: white; border: 3px solid var(--primary); 
-    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-    font-size: 30px; margin-bottom: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-}
-
-/* ID NEON */
-.pedido-id-neon { display: block; font-size: 28px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); text-align: center; margin: 10px 0; }
-.pix-code { color: var(--neon-blue); background: #111; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 11px; display: block; margin: 10px 0; }
-
-.container { max-width: 500px; margin: 20px auto; background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
-button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background: #111; overflow-x: hidden; transition: 0.4s; padding-top: 60px; }
+.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #bbb; display: block; border-bottom: 1px solid #222; }
+.container { max-width: 500px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+.servicos-destaque { display: flex; justify-content: space-around; margin: 20px 0; }
+.circulo-servico { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.icone-bola { width: 70px; height: 70px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 5px; }
+.pedido-id-neon { display: block; font-size: 28px; font-weight: bold; color: var(--neon); text-shadow: 0 0 10px var(--neon); text-align: center; margin: 10px 0; }
+.pix-code { color: var(--neon); background: #111; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 11px; display: block; margin: 10px 0; }
+.fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; }
+.fab { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: none; font-size: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.admin-tabs { display: flex; background: #111; position: sticky; top: 55px; z-index: 900; }
+.tab-btn { flex: 1; padding: 15px 5px; color: #888; border: none; background: none; font-weight: bold; font-size: 12px; border-bottom: 3px solid transparent; }
+.tab-btn.active { color: var(--neon); border-bottom-color: var(--neon); }
+.admin-section { display: none; }
+.admin-section.active { display: block; }
