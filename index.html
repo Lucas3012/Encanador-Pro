@@ -24,38 +24,37 @@
     </div>
 
     <div class="container">
-        <h1>🛠️ Serviços</h1>
-        <p style="text-align: center; color: #666;">Selecione uma categoria abaixo:</p>
+        <h1 style="text-align: center;">🛠️ Nossos Serviços</h1>
         
         <div class="servicos-destaque">
             <div class="circulo-servico" onclick="abrirPix('Vazamento')">
                 <div class="icone-bola">💧</div>
-                <span>Vazamento</span>
+                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Vazamento</span>
             </div>
             <div class="circulo-servico" onclick="abrirPix('Reparo')">
                 <div class="icone-bola">🛠️</div>
-                <span>Reparo</span>
+                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Reparo</span>
             </div>
             <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
                 <div class="icone-bola">🚽</div>
-                <span>Desentupimento</span>
+                <span style="font-size: 12px; font-weight: bold; color: #0056b3;">Desentupimento</span>
             </div>
         </div>
 
         <div id="form-container">
             <form id="formOrcamento">
-                <h3 style="color: #28a745; text-align: center;">✅ Formulário Liberado</h3>
+                <h3 style="color: #28a745; text-align: center; margin-bottom: 10px;">✅ Pagamento Validado!</h3>
                 <input type="text" id="nome" placeholder="Seu Nome" required>
-                <input type="text" id="endereco" placeholder="Seu Endereço" required>
+                <input type="text" id="endereco" placeholder="Endereço Completo" required>
                 <input type="text" id="servico_display" readonly>
-                <textarea id="mensagem" placeholder="Descreva o problema aqui..." rows="4"></textarea>
-                <button type="submit">Solicitar Atendimento</button>
+                <textarea id="mensagem" placeholder="Detalhes do problema..." rows="3"></textarea>
+                <button type="submit">Enviar Solicitação Final</button>
             </form>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://colleagues-louise-hazards-bobby.trycloudflare.com";
+        const API_BASE = "https://weights-brothers-first-bristol.trycloudflare.com";
         let idSessao = "";
 
         function toggleNav() {
@@ -64,35 +63,33 @@
         }
 
         async function abrirPix(servico) {
+            const idPedidoAleatorio = Math.floor(1000 + Math.random() * 9000);
             const pix = "00020126360014br.gov.bcb.pix0114+557398847817052040000530398654045.005802BR5921Lucas Emanuel Tavares6009Sao Paulo62230519daqr4913550667180526304C9B1";
             
             Swal.fire({
-                title: 'Pagamento de Reserva',
+                title: 'Reserva de Atendimento',
                 html: `
-                    <p>Pague a taxa para liberar o formulário:</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px;">
-                    <span class="pix-code">${pix}</span>
-                    <input id="swal-input" class="swal2-input" placeholder="Cole o código do comprovante">
+                    <p>ID DO PEDIDO:</p>
+                    <span class="pedido-id-neon">#${idPedidoAleatorio}</span>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pix)}" style="margin-bottom:10px; border: 2px solid #00f2ff; border-radius: 10px;">
+                    <span class="pix-code" id="pixTxt">${pix}</span>
+                    <button onclick="navigator.clipboard.writeText('${pix}'); alert('Código Copiado!')" style="background:#00f2ff; color:#000; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; margin-bottom:10px;">Copiar Pix</button>
+                    <input id="swal-input-cod" class="swal2-input" placeholder="Cole o código do comprovante">
                 `,
-                confirmButtonText: 'Validar Pix',
-                preConfirm: () => document.getElementById('swal-input').value
+                confirmButtonText: 'Validar Agora',
+                showCancelButton: true,
+                preConfirm: () => document.getElementById('swal-input-cod').value
             }).then(async (r) => {
                 if(r.isConfirmed && r.value) {
                     const res = await fetch(`${API_BASE}/api/verificar-pix`, { 
                         method: 'POST', 
                         headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({codigo: r.value, servico}) 
+                        body: JSON.stringify({codigo: r.value, servico, id_visto: idPedidoAleatorio}) 
                     });
                     const d = await res.json();
                     idSessao = d.id;
                     
-                    Swal.fire({ 
-                        title: 'Aguardando Aprovação', 
-                        text: 'O administrador está validando seu pagamento.', 
-                        allowOutsideClick: false, 
-                        didOpen: () => Swal.showLoading() 
-                    });
-                    
+                    Swal.fire({ title: 'Validando...', html: `Aguardando Admin para o Pedido <b>#${idPedidoAleatorio}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     checarStatus(servico);
                 }
             });
@@ -114,19 +111,9 @@
 
         document.getElementById('formOrcamento').onsubmit = async (e) => {
             e.preventDefault();
-            const dados = { 
-                id_sessao: idSessao, 
-                nome: document.getElementById('nome').value, 
-                endereco: document.getElementById('endereco').value, 
-                mensagem: document.getElementById('mensagem').value 
-            };
-            await fetch(`${API_BASE}/orcamento`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify(dados) 
-            });
-            Swal.fire('Sucesso!', 'Pedido enviado com sucesso.', 'success');
-            setTimeout(() => location.reload(), 2000);
+            const dados = { id_sessao: idSessao, nome: document.getElementById('nome').value, endereco: document.getElementById('endereco').value, mensagem: document.getElementById('mensagem').value };
+            await fetch(`${API_BASE}/orcamento`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) });
+            Swal.fire('Sucesso!', 'Seu pedido foi enviado.', 'success').then(() => location.reload());
         };
     </script>
 </body>
