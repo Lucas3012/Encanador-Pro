@@ -1,37 +1,55 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
-    margin: 0;
-    padding: 0;
+/* VARIÁVEIS DE CORES */
+:root {
+    --primary: #007bff;
+    --secondary: #25d366;
+    --dark: #333;
+    --light: #f4f4f4;
+    --white: #ffffff;
 }
 
-/* Status Bar */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body { 
+    /* ADICIONADO: Configuração da imagem de fundo */
+    background-image: url('fundo-banheiro.jpg');
+    background-size: cover; /* Cobre toda a tela */
+    background-position: center; /* Centraliza a imagem */
+    background-attachment: fixed; /* O fundo não rola junto com a página */
+    color: var(--dark); 
+}
+
+/* BARRA DE STATUS NO TOPO */
 .status-bar {
-    background: #111;
-    color: #00ff00;
-    font-size: 12px;
+    background: #e9ecef;
     padding: 8px 15px;
+    font-size: 12px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
 }
 
-/* Header & Menu */
+.dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.online { background-color: var(--secondary); box-shadow: 0 0 5px var(--secondary); }
+.offline { background-color: #dc3545; }
+
+/* HEADER E MENU */
 .header {
-    background: #007bff;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    position: relative;
+    background: var(--primary);
+    color: var(--white);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.openbtn {
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    font-size: 24px;
-    cursor: pointer;
-}
+.menu-icon { font-size: 24px; cursor: pointer; }
 
+/* SIDEBAR */
 .sidebar {
     height: 100%;
     width: 0;
@@ -39,97 +57,143 @@ body {
     z-index: 2000;
     top: 0;
     left: 0;
-    background-color: #111;
+    background-color: var(--dark);
     overflow-x: hidden;
-    transition: 0.5s;
+    transition: 0.3s;
     padding-top: 60px;
 }
 
 .sidebar a {
-    padding: 15px 30px;
+    padding: 15px 25px;
     text-decoration: none;
     font-size: 18px;
     color: #818181;
     display: block;
+    transition: 0.2s;
 }
 
-.sidebar .closebtn {
+.sidebar a:hover { color: var(--white); background: #444; }
+
+.sidebar .close-btn {
     position: absolute;
-    top: 0;
+    top: 10px;
     right: 25px;
     font-size: 36px;
 }
 
-/* Container e Ícones */
-.container { padding: 15px; max-width: 500px; margin: auto; }
+/* CONTAINER PRINCIPAL */
+.container { 
+    /* MODIFICADO: Transparência para ver o fundo, mas manter o texto legível */
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 20px; 
+    max-width: 500px; 
+    margin: auto; 
+    margin-top: 20px; 
+    margin-bottom: 20px;
+    border-radius: 15px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
 
+/* BOTÕES DE SERVIÇO (HOME) */
 .servicos-destaque {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     margin: 20px 0;
 }
 
-.circulo-servico { text-align: center; width: 30%; cursor: pointer; }
+.circulo-servico {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
 
 .icone-bola {
-    background: white;
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
+    background: var(--white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    margin: 0 auto 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-size: 30px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 8px;
+    border: 2px solid var(--primary);
 }
 
-.secao-titulo { font-weight: bold; margin: 20px 0 10px; color: #444; }
-
-/* Mapa e Cards */
-#map { height: 180px; border-radius: 15px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
+/* CARDS DOS TÉCNICOS */
 .card-tecnico {
-    background: white;
-    padding: 15px;
+    background: var(--white);
     border-radius: 12px;
-    margin-bottom: 10px;
+    padding: 15px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border-left: 5px solid var(--primary);
+    margin-bottom: 12px;
 }
 
-.btn-whats-tecnico {
-    background: #25d366;
-    color: white;
-    width: 35px;
-    height: 35px;
+.tecnico-info { display: flex; align-items: center; gap: 12px; }
+.tecnico-texto b { display: block; font-size: 15px; }
+.tecnico-texto span { font-size: 12px; color: #777; }
+
+/* PULSO DO WHATSAPP */
+.pulse-green {
+    animation: pulse-animation 2s infinite;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
+}
+@keyframes pulse-animation {
+    0% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+    100% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0); }
 }
 
-/* WhatsApp Flutuante */
-.whatsapp-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #25d366;
+/* FORMULÁRIOS E INPUTS */
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+button {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary);
     color: white;
-    border-radius: 50px;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    z-index: 1500;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+/* CONTAINER DA GRADE DE FOTOS */
+.galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Cria colunas automáticas */
+    gap: 12px; /* Espaço entre as fotos */
+    padding: 10px 0;
 }
 
-.whatsapp-float img { width: 25px; height: 25px; margin-right: 8px; }
+/* CADA ITEM DA FOTO */
+.foto-item {
+    aspect-ratio: 1 / 1; /* Faz a foto ser sempre um quadrado perfeito */
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 3px solid white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
 
-@media (max-width: 480px) {
-    .whatsapp-float span { display: none; }
+.foto-item:hover {
+    transform: scale(1.05); /* Efeito de zoom ao tocar/passar o mouse */
+}
+
+.foto-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Faz a imagem preencher o quadrado sem distorcer */
 }

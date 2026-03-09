@@ -7,147 +7,123 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="admin-body">
-
-    <script>
-        // DEFINA SUA SENHA AQUI:
-        const SENHA_MESTRE = "1234"; 
-
-        function verificarAcesso() {
-            const senhaDigitada = sessionStorage.getItem('admin_logado');
-            if (senhaDigitada !== SENHA_MESTRE) {
-                Swal.fire({
-                    title: 'Área Restrita',
-                    text: 'Digite a senha do mestre:',
-                    input: 'password',
-                    inputAttributes: { autocapitalize: 'off' },
-                    showCancelButton: false,
-                    confirmButtonText: 'Entrar',
-                    confirmButtonColor: '#1a1a1a',
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.value === SENHA_MESTRE) {
-                        sessionStorage.setItem('admin_logado', SENHA_MESTRE);
-                        carregarPainel();
-                    } else {
-                        Swal.fire('Acesso Negado!', 'Senha incorreta.', 'error').then(() => {
-                            window.location.href = "index.html";
-                        });
-                    }
-                });
-            } else {
-                carregarPainel();
-            }
-        }
-    </script>
-
-    <div class="status-bar">
-        <span>🔐 Painel Restrito - Lucas Emanuel</span>
-        <button onclick="logout()" style="background:none; border:none; color:red; font-size:10px; cursor:pointer;">SAIR</button>
-        <span id="sys-status">🟢 Online</span>
+<body>
+    <div class="header">
+        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
+        <b>Painel Mestre</b>
     </div>
 
     <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a href="index.html">🏠 Início Site</a>
+        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="historico.html">📋 Histórico</a>
+        <a href="galeria.html">📸 Galeria</a>
         <a href="admin.html">🔐 Painel Admin</a>
-        <a href="historico.html">📜 Histórico</a>
-        <a href="galeria.html">🖼️ Galeria</a>
     </div>
 
-    <div class="header" style="background: #1a1a1a;">
-        <span class="openbtn" onclick="openNav()">&#9776;</span>
-        <h1 class="logo-centralizado">GESTÃO DE SERVIÇOS</h1>
+    <div id="login-screen" class="container" style="margin-top:50px;">
+        <h2 style="text-align:center;">Login Administrativo</h2>
+        <input type="password" id="admin-pass" placeholder="Senha" style="text-align:center;">
+        <button onclick="fazerLogin()">ENTRAR</button>
     </div>
 
-    <div class="container">
-        
-        <div class="secao-titulo">💰 Liberação de PIX (Pendentes):</div>
-        <div id="lista-pix" class="admin-card-container">
-            <p class="loading-msg">Carregando solicitações...</p>
+    <div id="panel-content" style="display:none">
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="mudarAba('tab-pix', this)">💰 Liberar PIX</button>
+            <button class="tab-btn" onclick="mudarAba('tab-galeria', this)">📸 Galeria</button>
+            <button class="tab-btn" onclick="mudarAba('tab-colab', this)">👷 Técnicos</button>
         </div>
 
-        <div class="secao-titulo">💼 Candidatos a Técnicos:</div>
-        <div id="lista-candidatos" class="admin-card-container">
-            <p class="loading-msg">Buscando currículos...</p>
+        <div id="tab-pix" class="admin-section active container">
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <h3>Liberar ID do Cliente</h3>
+                <input type="number" id="input-id" placeholder="Código de 4 dígitos" style="font-size:24px; text-align:center; margin: 15px 0;">
+                <button onclick="validarID()" style="background:#28a745;">LIBERAR AGORA ✅</button>
+            </div>
         </div>
 
+        <div id="tab-galeria" class="admin-section container"><div id="lista-pendentes"></div></div>
+        <div id="tab-colab" class="admin-section container"><div id="lista-colabs"></div></div>
     </div>
 
     <script>
-        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        const API = "http://localhost:3000";
 
-        const API_BASE = "https://bennett-data-warranties-calculate.trycloudflare.com";
+        function toggleNav() {
+            const s = document.getElementById("mySidebar");
+            s.style.width = s.style.width === "250px" ? "0" : "250px";
+        }
 
-        async function carregarPainel() {
+        function fazerLogin() {
+            if(document.getElementById('admin-pass').value === '1234') {
+                Swal.fire({ icon: 'success', title: 'Acesso Liberado', timer: 1000, showConfirmButton: false });
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('panel-content').style.display = 'block';
+            } else { Swal.fire('Erro', 'Senha incorreta', 'error'); }
+        }
+
+        function mudarAba(id, btn) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); 
+            btn.classList.add('active');
+            if(id === 'tab-galeria') carregarPendentes();
+            if(id === 'tab-colab') carregarColabs();
+        }
+
+        async function validarID() {
+            const idInput = document.getElementById('input-id').value;
+            if(!idInput) return Swal.fire('Aviso', 'Digite o ID!', 'warning');
+
+            Swal.fire({ title: 'Buscando ID...', didOpen: () => Swal.showLoading() });
+
             try {
-                const res = await fetch(`${API_BASE}/api/admin/painel`, {
-                    headers: { 'bypass-tunnel-reminder': 'true' }
+                const res = await fetch(`${API}/api/admin/liberar-por-id`, { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ id_visto: idInput }) 
                 });
-                const data = await res.json();
 
-                // Renderizar PIX Pendentes
-                const divPix = document.getElementById('lista-pix');
-                const pendentes = data.sessoes.filter(s => s.status === 'pendente');
-                divPix.innerHTML = pendentes.length ? pendentes.map(s => `
-                    <div class="card-admin pix">
-                        <div class="info">
-                            <b>ID: #${s.id_visto}</b>
-                            <span>Serviço: ${s.servico}</span>
-                            <small>${new Date(s.data).toLocaleTimeString()}</small>
-                        </div>
-                        <button onclick="liberarPix('${s.id_visto}')" class="btn-liberar">LIBERAR ✅</button>
-                    </div>
-                `).join('') : '<p class="empty-msg">Nenhum PIX aguardando.</p>';
-
-                // Renderizar Candidatos
-                const divCands = document.getElementById('lista-candidatos');
-                divCands.innerHTML = data.candidatos.length ? data.candidatos.map(c => `
-                    <div class="card-admin cand">
-                        <div class="info">
-                            <b>${c.nome}</b>
-                            <span>Esp: ${c.especialidade}</span>
-                            <a href="https://wa.me/${c.telefone.replace(/\D/g,'')}" target="_blank">📱 ${c.telefone}</a>
-                        </div>
-                    </div>
-                `).join('') : '<p class="empty-msg">Nenhum candidato.</p>';
-
-            } catch (e) { document.getElementById('sys-status').innerText = "🔴 Offline"; }
+                if(res.ok) {
+                    Swal.fire('Sucesso!', `ID #${idInput} liberado no db.json!`, 'success');
+                    document.getElementById('input-id').value = "";
+                } else {
+                    Swal.fire('Não encontrado', 'Este ID não existe ou já expirou.', 'error');
+                }
+            } catch (e) { Swal.fire('Erro', 'Servidor Offline', 'error'); }
         }
 
-        async function liberarPix(id) {
-            const res = await fetch(`${API_BASE}/api/liberar-pix`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true' },
-                body: JSON.stringify({ id_visto: id })
-            });
-            if(res.ok) {
-                Swal.fire('Liberado!', 'Cliente autorizado.', 'success');
-                carregarPainel();
-            }
+        async function carregarPendentes() {
+            const res = await fetch(`${API}/api/admin/pendentes`);
+            const fotos = await res.json();
+            document.getElementById('lista-pendentes').innerHTML = fotos.map(f => `
+                <div class="admin-card">
+                    <img src="${API}/temp/${f}" style="width:100%">
+                    <button onclick="decidirFoto('${f}','aprovar')" style="background:green">APROVAR</button>
+                    <button onclick="decidirFoto('${f}','deletar')" style="background:red">REJEITAR</button>
+                </div>`).join('');
         }
 
-        function logout() {
-            sessionStorage.removeItem('admin_logado');
-            window.location.reload();
+        async function decidirFoto(foto, acao) {
+            await fetch(`${API}/api/admin/decidir-foto`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ foto, acao }) });
+            carregarPendentes();
         }
 
-        window.onload = verificarAcesso;
+        async function carregarColabs() {
+            const res = await fetch(`${API}/api/admin/colaboradores`);
+            const colabs = await res.json();
+            document.getElementById('lista-colabs').innerHTML = colabs.map(c => `
+                <div class="admin-card">
+                    <b>${c.nome}</b> (${c.funcao})
+                    ${!c.aprovado ? `<button onclick="decidirColab('${c.id}','aprovar')">APROVAR NO MAPA</button>` : '<span>✓ Ativo</span>'}
+                    <button onclick="decidirColab('${c.id}','deletar')" style="background:red">REMOVER</button>
+                </div>`).join('');
+        }
+
+        async function decidirColab(id, acao) {
+            await fetch(`${API}/api/admin/decidir-colaborador`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, acao }) });
+            carregarColabs();
+        }
     </script>
-
-    <style>
-        /* Estilos mantidos do anterior para manter o padrão */
-        .admin-body { background: #f0f0f0; }
-        .card-admin { background: white; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card-admin.pix { border-left: 5px solid #ffcc00; }
-        .card-admin.cand { border-left: 5px solid #007bff; }
-        .btn-liberar { background: #25d366; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .info { display: flex; flex-direction: column; }
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
-        .sidebar a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
-        .sidebar .closebtn { position: absolute; top: 0; right: 25px; font-size: 36px; }
-        .openbtn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: white; }
-    </style>
 </body>
 </html>

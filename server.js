@@ -2,128 +2,133 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
-
-// --- CONFIGURAÇÃO DE SEGURANÇA E BYPASS CLOUDFLARE ---
 app.use(cors());
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, bypass-tunnel-reminder");
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
-    next();
-});
 app.use(express.json());
 
-// --- BANCO DE DADOS (db.json) ---
+// CONFIGURAÇÃO DE DIRETÓRIOS
+const UPLOADS = path.join(__dirname, 'uploads');
+const TEMP = path.join(__dirname, 'temp_galeria');
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+[UPLOADS, TEMP, DATA_DIR].forEach(f => { if (!fs.existsSync(f)) fs.mkdirSync(f); });
+
 if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify({ 
-        sessoes: [],         // Para Histórico e Admin (PIX)
-        colaboradores: [],   // Para Index e Trabalhe Conosco
-        galeria: [],         // Para Galeria de Fotos
-        candidatos: []       // Para Receber currículos do Trabalhe Conosco
-    }, null, 2));
+    fs.writeFileSync(DB_PATH, JSON.stringify({ sessoes: [], colaboradores: [] }, null, 2));
 }
 
-// --- HELPER: LER/ESCREVER DB ---
-const readDB = () => JSON.parse(fs.readFileSync(DB_PATH));
-const writeDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+// Configuração Multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, TEMP),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+app.use('/fotos', express.static(UPLOADS));
+app.use('/temp', express.static(TEMP));
+
+// --- FUNÇÃO AUXILIAR PARA LIMPAR IDs ---
+// Remove o '#' e espaços extras para evitar erros de busca
+const limparID = (id) => String(id).replace('#', '').trim();
 
 // ==========================================
-// 1. ROTAS PARA INDEX.HTML (Técnicos e Início)
+//           ROTAS DO CLIENTE
 // ==========================================
-app.get('/api/aprovados', (req, res) => {
-    const db = readDB();
-    res.json(db.colaboradores.filter(c => c.aprovado) || []);
-});
 
 app.post('/api/registrar-id', (req, res) => {
-    const db = readDB();
-    const novaSessao = {
-        id_visto: req.body.id_visto,
-        servico: req.body.servico || "Geral",
-        status: "pendente",
-        data: new Date()
-    };
-    db.sessoes.push(novaSessao);
-    writeDB(db);
-    res.json({ success: true });
+    try {
+        const db = JSON.parse(fs.readFileSync(DB_PATH));
+        const novaSessao = {
+            id_visto: limparID(req.body.id_visto), // Salva SEM o '#'
+            servico: req.body.servico,
+            status: "pendente",
+            data: new Date().toISOString()
+        };
+        db.sessoes.push(novaSessao);
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: "Erro ao salvar" }); }
 });
 
 app.get('/api/status/:id', (req, res) => {
-    const db = readDB();
-    const s = db.sessoes.find(x => x.id_visto == req.params.id);
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    const s = db.sessoes.find(x => limparID(x.id_visto) === limparID(req.params.id));
     res.json({ status: s ? s.status : 'pendente' });
 });
 
 // ==========================================
-// 2. ROTAS PARA HISTORICO.HTML
+//           ROTAS DO ADMIN
 // ==========================================
-app.get('/api/sessoes-full', (req, res) => {
-    const db = readDB();
-    res.json(db.sessoes || []);
+
+// LIBERAR CÓDIGO (PIX) - AGORA À PROVA DE ERROS
+app.post('/api/admin/liberar-por-id', (req, res) => {
+    try {
+        const db = JSON.parse(fs.readFileSync(DB_PATH));
+        const idProcurado = limparID(req.body.id_visto); // Remove '#' se o admin digitar
+        
+        const i = db.sessoes.findIndex(s => limparID(s.id_visto) === idProcurado);
+
+        if (i !== -1) { 
+            db.sessoes[i].status = "liberado"; 
+            fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); 
+            console.log(`✅ ID ${idProcurado} LIBERADO!`);
+            res.json({ success: true }); 
+        } else {
+            console.log(`❌ ID ${idProcurado} não encontrado no db.json`);
+            res.status(404).json({ error: "ID não encontrado" });
+        }
+    } catch (e) { res.status(500).send("Erro"); }
 });
 
-// ==========================================
-// 3. ROTAS PARA ADMIN.HTML (Gerenciamento)
-// ==========================================
-app.get('/api/admin/painel', (req, res) => {
-    const db = readDB();
-    res.json({
-        sessoes: db.sessoes,
-        candidatos: db.candidatos,
-        colaboradores: db.colaboradores
-    });
-});
-
-app.post('/api/liberar-pix', (req, res) => {
-    const db = readDB();
-    const { id_visto } = req.body;
-    const s = db.sessoes.find(x => x.id_visto == id_visto);
-    if(s) { s.status = "liberado"; writeDB(db); res.json({success: true}); }
-    else { res.status(404).json({success: false}); }
-});
-
-// ==========================================
-// 4. ROTAS PARA GALERIA.HTML
-// ==========================================
-app.get('/api/galeria', (req, res) => {
-    const db = readDB();
-    res.json(db.galeria || []);
-});
-
-app.post('/api/galeria/postar', (req, res) => {
-    const db = readDB();
-    db.galeria.push({ url: req.body.url, legenda: req.body.legenda, data: new Date() });
-    writeDB(db);
+// APROVAR OU EXCLUIR FOTOS
+app.get('/api/admin/pendentes', (req, res) => res.json(fs.readdirSync(TEMP)));
+app.post('/api/admin/decidir-foto', (req, res) => {
+    const { foto, acao } = req.body;
+    const pTemp = path.join(TEMP, foto);
+    const pFinal = path.join(UPLOADS, foto);
+    if (acao === 'aprovar' && fs.existsSync(pTemp)) fs.renameSync(pTemp, pFinal);
+    else if (fs.existsSync(pTemp)) fs.unlinkSync(pTemp);
     res.json({ success: true });
 });
 
-// ==========================================
-// 5. ROTAS PARA TRABALHE-CONOSCO.HTML
-// ==========================================
-app.post('/api/trabalhe/enviar', (req, res) => {
-    const db = readDB();
-    const novoCandidato = {
-        nome: req.body.nome,
-        telefone: req.body.telefone,
-        especialidade: req.body.especialidade,
-        data: new Date(),
-        status: "em_analise"
-    };
-    db.candidatos.push(novoCandidato);
-    writeDB(db);
-    res.json({ success: true, message: "Currículo enviado com sucesso!" });
+// APROVAR OU EXCLUIR COLABORADORES
+app.get('/api/admin/colaboradores', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    res.json(db.colaboradores);
+});
+app.post('/api/admin/decidir-colaborador', (req, res) => {
+    const { id, acao } = req.body;
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    const idx = db.colaboradores.findIndex(c => c.id == id);
+    if (idx !== -1) {
+        if (acao === 'aprovar') db.colaboradores[idx].aprovado = true;
+        else db.colaboradores.splice(idx, 1);
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        res.json({ success: true });
+    } else res.status(404).send();
 });
 
-// --- INICIALIZAÇÃO ---
-app.listen(3000, () => {
-    console.log("-----------------------------------------");
-    console.log("🚀 ECOSSISTEMA ENCANADOR PRO - FULL ONLINE");
-    console.log("-----------------------------------------");
+// HISTÓRICO
+app.get('/api/admin/historico', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    res.json(db.sessoes.sort((a,b) => new Date(b.data) - new Date(a.data)));
 });
+
+// Outras rotas de galeria/cadastro...
+app.post('/api/upload-galeria', upload.single('foto'), (req, res) => res.json({ success: true }));
+app.get('/api/galeria', (req, res) => res.json(fs.readdirSync(UPLOADS)));
+app.post('/api/colaborador', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    db.colaboradores.push({ id: Date.now(), ...req.body, aprovado: false });
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ success: true });
+});
+app.get('/api/aprovados', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    res.json(db.colaboradores.filter(c => c.aprovado));
+});
+
+app.listen(3000, () => console.log("🚀 Servidor Rodando (Porta 3000)"));

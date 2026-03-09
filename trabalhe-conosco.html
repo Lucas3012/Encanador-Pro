@@ -1,149 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabalhe Conosco - Encanador Pro</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabalhe Conosco</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
-    <div class="status-bar">
-        <span>📍 Oportunidade em Itabuna-BA</span>
-        <span id="sys-status">🟢 Sistema Ativo</span>
-    </div>
-
+    <div class="header"><span class="menu-icon" onclick="toggleNav()">&#9776;</span><b>Seja Parceiro</b></div>
     <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
         <a href="index.html">🏠 Início</a>
-        <a href="historico.html">📜 Histórico</a>
-        <a href="galeria.html">🖼️ Galeria</a>
-        <a href="trabalhe.html">💼 Trabalhe Conosco</a>
-        <hr style="border-top: 1px solid #444; margin: 10px 0;">
+        <a href="galeria.html">📸 Galeria</a>
+        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
-    <div class="header">
-        <span class="openbtn" onclick="openNav()">&#9776;</span>
-        <h1 class="logo-centralizado">TRABALHE CONOSCO</h1>
-    </div>
-
     <div class="container">
-        <div class="card-form">
-            <h2 style="text-align: center; color: #007bff;">Seja um Parceiro</h2>
-            <p style="text-align: center; font-size: 13px; color: #666; margin-bottom: 20px;">
-                É encanador profissional em Itabuna? Junte-se à nossa equipa de elite.
-            </p>
-
-            <form id="form-candidato">
-                <div class="campo">
-                    <label>Nome Completo:</label>
-                    <input type="text" id="nome" placeholder="Ex: João Silva" required>
-                </div>
-
-                <div class="campo">
-                    <label>WhatsApp (com DDD):</label>
-                    <input type="tel" id="telefone" placeholder="73 99999-9999" required>
-                </div>
-
-                <div class="campo">
-                    <label>Especialidade Principal:</label>
-                    <select id="especialidade">
-                        <option value="Encanador Geral">Encanador Geral</option>
-                        <option value="Caça Vazamentos">Caça Vazamentos</option>
-                        <option value="Desentupidor">Desentupidor</option>
-                        <option value="Instalações Hidráulicas">Instalações Hidráulicas</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-enviar">ENVIAR CANDIDATURA</button>
-            </form>
-        </div>
+        <form id="formColab">
+            <input type="text" id="n" placeholder="Nome Completo" required>
+            <input type="tel" id="t" placeholder="WhatsApp (DDD + Número)" required>
+            <select id="fun"><option value="Encanador">Encanador</option><option value="Eletricista">Eletricista</option></select>
+            <textarea id="e" placeholder="Experiência..."></textarea>
+            <button type="submit">CADASTRAR E APARECER NO MAPA</button>
+        </form>
     </div>
 
     <script>
-        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
-
-        // --- ATUALIZE COM O SEU LINK DO CLOUDFLARE ---
-        const API_BASE = "https://bennett-data-warranties-calculate.trycloudflare.com";
-
-        document.getElementById('form-candidato').addEventListener('submit', async (e) => {
+        function toggleNav() { const s = document.getElementById("mySidebar"); s.style.width = s.style.width === "250px" ? "0" : "250px"; }
+        document.getElementById('formColab').onsubmit = async (e) => {
             e.preventDefault();
-
-            const dados = {
-                nome: document.getElementById('nome').value,
-                telefone: document.getElementById('telefone').value,
-                especialidade: document.getElementById('especialidade').value
-            };
-
-            Swal.fire({ title: 'Enviando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            try {
-                const res = await fetch(`${API_BASE}/api/trabalhe/enviar`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'bypass-tunnel-reminder': 'true'
-                    },
-                    body: JSON.stringify(dados)
-                });
-
-                if (res.ok) {
-                    Swal.fire('Sucesso!', 'Os seus dados foram enviados. Lucas Emanuel entrará em contacto em breve.', 'success');
-                    document.getElementById('form-candidato').reset();
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                Swal.fire('Erro', 'Não foi possível enviar agora. Verifique se o servidor está online.', 'error');
-            }
-        });
+            Swal.fire({ title: 'Processando...', didOpen: () => Swal.showLoading() });
+            const dados = { nome: document.getElementById('n').value, telefone: document.getElementById('t').value, funcao: document.getElementById('fun').value, exp: document.getElementById('e').value };
+            await fetch('http://localhost:3000/api/colaborador', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dados) });
+            Swal.fire('Sucesso!', 'Seu cadastro foi enviado.', 'success').then(() => location.href="index.html");
+        };
     </script>
-
-    <style>
-        .card-form {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-
-        .campo { margin-bottom: 15px; }
-        .campo label { display: block; font-size: 14px; font-weight: bold; color: #444; margin-bottom: 5px; }
-        
-        .campo input, .campo select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
-
-        .btn-enviar {
-            width: 100%;
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-enviar:hover { background: #0056b3; }
-
-        /* Reutilização da Sidebar do index */
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
-        .sidebar a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
-        .sidebar .closebtn { position: absolute; top: 0; right: 25px; font-size: 36px; }
-        .openbtn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: white; }
-    </style>
 </body>
 </html>
