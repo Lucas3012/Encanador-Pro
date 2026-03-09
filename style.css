@@ -1,9 +1,42 @@
-/* Sidebar Menu */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Status Bar */
+.status-bar {
+    background: #111;
+    color: #00ff00;
+    font-size: 12px;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Header & Menu */
+.header {
+    background: #007bff;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.openbtn {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
 .sidebar {
     height: 100%;
     width: 0;
     position: fixed;
-    z-index: 10001; /* Fica acima de tudo */
+    z-index: 2000;
     top: 0;
     left: 0;
     background-color: #111;
@@ -13,47 +46,73 @@
 }
 
 .sidebar a {
-    padding: 15px 32px;
+    padding: 15px 30px;
     text-decoration: none;
     font-size: 18px;
     color: #818181;
     display: block;
-    transition: 0.3s;
 }
-
-.sidebar a:hover { color: #f1f1f1; background: #222; }
 
 .sidebar .closebtn {
     position: absolute;
     top: 0;
     right: 25px;
     font-size: 36px;
-    margin-left: 50px;
 }
 
-/* Botão de abrir o menu no Header */
-.openbtn {
-    font-size: 25px;
-    cursor: pointer;
-    background-color: transparent;
+/* Container e Ícones */
+.container { padding: 15px; max-width: 500px; margin: auto; }
+
+.servicos-destaque {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.circulo-servico { text-align: center; width: 30%; cursor: pointer; }
+
+.icone-bola {
+    background: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.secao-titulo { font-weight: bold; margin: 20px 0 10px; color: #444; }
+
+/* Mapa e Cards */
+#map { height: 180px; border-radius: 15px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+.card-tecnico {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.btn-whats-tecnico {
+    background: #25d366;
     color: white;
-    border: none;
-    position: absolute;
-    left: 15px;
-    top: 22px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
-/* Ajustes de inputs que estavam faltando no anterior */
-#end, #serv_display {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-sizing: border-box; /* Importante para não passar da tela */
-}
-
-/* Mantém o botão de WhatsApp no lugar */
+/* WhatsApp Flutuante */
 .whatsapp-float {
     position: fixed;
     bottom: 20px;
@@ -61,10 +120,16 @@
     background-color: #25d366;
     color: white;
     border-radius: 50px;
-    padding: 10px 20px;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
     text-decoration: none;
-    z-index: 9999;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 1500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.whatsapp-float img { width: 25px; height: 25px; margin-right: 8px; }
+
+@media (max-width: 480px) {
+    .whatsapp-float span { display: none; }
 }

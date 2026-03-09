@@ -21,7 +21,7 @@
         <a href="historico.html">📜 Histórico</a>
         <a href="galeria.html">🖼️ Galeria</a>
         <a href="trabalhe.html">💼 Trabalhe Conosco</a>
-        <hr style="border: 0.5px solid #444; margin: 10px 0;">
+        <hr style="border-top: 1px solid #444; margin: 10px 0;">
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
@@ -32,38 +32,47 @@
 
     <div class="container">
         <div class="servicos-destaque">
-            <div class="circulo-servico" onclick="abrirPix('Vazamento')"><div class="icone-bola">💧</div><span>Vazamento</span></div>
-            <div class="circulo-servico" onclick="abrirPix('Reparo')"><div class="icone-bola">🛠️</div><span>Reparo</span></div>
-            <div class="circulo-servico" onclick="abrirPix('Desentupimento')"><div class="icone-bola">🚽</div><span>Entupiu</span></div>
+            <div class="circulo-servico" onclick="abrirPix('Vazamento')">
+                <div class="icone-bola">💧</div>
+                <span>Vazamento</span>
+            </div>
+            <div class="circulo-servico" onclick="abrirPix('Reparo')">
+                <div class="icone-bola">🛠️</div>
+                <span>Reparo</span>
+            </div>
+            <div class="circulo-servico" onclick="abrirPix('Desentupimento')">
+                <div class="icone-bola">🚽</div>
+                <span>Entupiu</span>
+            </div>
         </div>
 
         <div class="secao-titulo">👨‍🔧 Técnicos de Plantão:</div>
         <div id="lista-tecnicos"></div>
 
         <div class="secao-titulo">📍 Cobertura em Itabuna:</div>
-        <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 25px; border: 2px solid #fff;"></div>
+        <div id="map"></div>
 
-        <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-bottom: 80px;">
+        <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-top: 20px; margin-bottom: 100px;">
             <h3 style="text-align:center; color:#25d366; margin-top:0;">✅ Acesso Liberado!</h3>
-            <input type="text" id="end" placeholder="Seu Endereço completo">
+            <input type="text" id="end" placeholder="Seu Endereço em Itabuna">
             <input type="text" id="serv_display" readonly>
-            <button onclick="enviarWhatsFinal()" style="width:100%; background:#25d366; color:white; border:none; padding:15px; border-radius:10px; font-weight:bold;">SOLICITAR TÉCNICO AGORA 💬</button>
+            <button onclick="enviarWhatsFinal()" class="btn-agendar">SOLICITAR TÉCNICO AGORA 💬</button>
         </div>
     </div>
 
-    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20o%20site%20e%20preciso%20de%20um%20encanador%20em%20Itabuna." class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20o%20site%20e%20preciso%20de%20um%20encanador%20em%20Itabuna." 
+       class="whatsapp-float" 
+       target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         <span>Falar com o Mestre</span>
     </a>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- FUNÇÕES DO MENU ---
         function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
         function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
-        // --- SEU LINK DO CLOUDFLARE ---
-        const API_BASE = "https://rules-ebook-hypothesis-traditional.trycloudflare.com";
+        const API_BASE = "https://cited-ingredients-steven-theology.trycloudflare.com";
 
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -77,36 +86,9 @@
                         <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
                         <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
                     </div>
-                `).join('') || "<p style='font-size:12px; color:#888; text-align:center;'>Buscando técnicos...</p>";
+                `).join('') || "<p style='text-align:center; font-size:12px; color:#999;'>Buscando técnicos...</p>";
                 document.getElementById('sys-status').innerText = "🟢 Online";
             } catch(e) { document.getElementById('sys-status').innerText = "🔴 Offline"; }
-        }
-
-        async function abrirPix(servico) {
-            const id = Math.floor(1000 + Math.random() * 9000).toString();
-            Swal.fire({ title: 'Reserva #'+id, html: '<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX_AQUI"><p>Pague para liberar o atendimento.</p>', showConfirmButton: false });
-            
-            await fetch(`${API_BASE}/api/registrar-id`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'}, 
-                body: JSON.stringify({ id_visto: id, servico: servico }) 
-            });
-
-            const check = setInterval(async () => {
-                const res = await fetch(`${API_BASE}/api/status/${id}`, { headers: {'bypass-tunnel-reminder': 'true'} });
-                const data = await res.json();
-                if(data.status === 'liberado') {
-                    clearInterval(check); Swal.close();
-                    document.getElementById('form-container').style.display='block';
-                    document.getElementById('serv_display').value = servico;
-                }
-            }, 3000);
-        }
-
-        function enviarWhatsFinal() {
-            const end = document.getElementById('end').value;
-            if(!end) return alert("Digite seu endereço!");
-            window.open(`https://wa.me/5573988478170?text=Pagamento%20feito!%20Endereço:%20${encodeURIComponent(end)}`);
         }
 
         window.onload = carregarTecnicos;
