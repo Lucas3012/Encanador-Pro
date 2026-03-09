@@ -11,11 +11,22 @@
 <body>
 
     <div class="status-bar">
-        <span>📍 Atendimento em Itabuna-BA</span>
+        <span>📍 Itabuna-BA</span>
         <span id="sys-status">🟢 Verificando...</span>
     </div>
 
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="historico.html">📜 Histórico</a>
+        <a href="galeria.html">🖼️ Galeria</a>
+        <a href="trabalhe.html">💼 Trabalhe Conosco</a>
+        <hr style="border: 0.5px solid #444; margin: 10px 0;">
+        <a href="admin.html">🔐 Painel Admin</a>
+    </div>
+
     <div class="header">
+        <span class="openbtn" onclick="openNav()">&#9776;</span>
         <h1 class="logo-centralizado">💧 ENCANADOR PRO</h1>
     </div>
 
@@ -27,38 +38,36 @@
         </div>
 
         <div class="secao-titulo">👨‍🔧 Técnicos de Plantão:</div>
-        <div id="lista-tecnicos">
-            <p style="text-align:center; color:#888; font-size:12px;">Carregando profissionais...</p>
-        </div>
+        <div id="lista-tecnicos"></div>
 
         <div class="secao-titulo">📍 Cobertura em Itabuna:</div>
-        <div id="map" style="height: 200px; border-radius: 15px; margin-bottom: 25px; border: 2px solid #fff;"></div>
+        <div id="map" style="height: 180px; border-radius: 15px; margin-bottom: 25px; border: 2px solid #fff;"></div>
 
         <div id="form-container" style="display:none; background: #fff; padding: 20px; border-radius: 15px; border: 3px solid #25d366; margin-bottom: 80px;">
             <h3 style="text-align:center; color:#25d366; margin-top:0;">✅ Acesso Liberado!</h3>
-            <input type="text" id="end" placeholder="Seu Endereço em Itabuna" style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
-            <input type="text" id="serv_display" readonly style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; background:#f9f9f9;">
-            <button onclick="enviarWhatsFinal()" style="width:100%; background:#25d366; color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">SOLICITAR TÉCNICO AGORA 💬</button>
+            <input type="text" id="end" placeholder="Seu Endereço completo">
+            <input type="text" id="serv_display" readonly>
+            <button onclick="enviarWhatsFinal()" style="width:100%; background:#25d366; color:white; border:none; padding:15px; border-radius:10px; font-weight:bold;">SOLICITAR TÉCNICO AGORA 💬</button>
         </div>
     </div>
 
-    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20o%20site%20e%20preciso%20de%20um%20encanador%20em%20Itabuna." 
-       class="whatsapp-float" 
-       target="_blank">
+    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20o%20site%20e%20preciso%20de%20um%20encanador%20em%20Itabuna." class="whatsapp-float" target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         <span>Falar com o Mestre</span>
     </a>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ATUALIZE ESTE LINK COM O SEU CLOUDFLARE ATIVO
-        const API_BASE = "https://shaw-avenue-columbus-crafts.trycloudflare.com";
+        // --- FUNÇÕES DO MENU ---
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
-        // Inicializar Mapa
+        // --- SEU LINK DO CLOUDFLARE ---
+        const API_BASE = "https://rules-ebook-hypothesis-traditional.trycloudflare.com";
+
         const map = L.map('map', { zoomControl: false }).setView([-14.7924, -39.2821], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Carregar Técnicos do Servidor
         async function carregarTecnicos() {
             try {
                 const res = await fetch(`${API_BASE}/api/aprovados`, { headers: {'bypass-tunnel-reminder': 'true'} });
@@ -68,22 +77,15 @@
                         <div class="tecnico-info"><b>${t.nome}</b><span>${t.funcao}</span></div>
                         <a href="https://wa.me/${t.telefone.replace(/\D/g,'')}" class="btn-whats-tecnico">💬</a>
                     </div>
-                `).join('') || "<p style='font-size:12px; color:#888;'>Nenhum técnico disponível no momento.</p>";
-                document.getElementById('sys-status').innerText = "🟢 Sistema Online";
-            } catch(e) {
-                document.getElementById('sys-status').innerText = "🔴 Sistema Offline";
-            }
+                `).join('') || "<p style='font-size:12px; color:#888; text-align:center;'>Buscando técnicos...</p>";
+                document.getElementById('sys-status').innerText = "🟢 Online";
+            } catch(e) { document.getElementById('sys-status').innerText = "🔴 Offline"; }
         }
 
-        // Função do PIX
         async function abrirPix(servico) {
             const id = Math.floor(1000 + Math.random() * 9000).toString();
-            Swal.fire({
-                title: 'Reserva de Visita',
-                html: `<p>ID: <b>#${id}</b></p><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CHAVE_PIX_AQUI" style="margin:10px;"><p style="font-size:12px; color:#666;">Pague o Pix para liberar o agendamento.</p>`,
-                showConfirmButton: false
-            });
-
+            Swal.fire({ title: 'Reserva #'+id, html: '<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=PIX_AQUI"><p>Pague para liberar o atendimento.</p>', showConfirmButton: false });
+            
             await fetch(`${API_BASE}/api/registrar-id`, { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'}, 
@@ -94,21 +96,17 @@
                 const res = await fetch(`${API_BASE}/api/status/${id}`, { headers: {'bypass-tunnel-reminder': 'true'} });
                 const data = await res.json();
                 if(data.status === 'liberado') {
-                    clearInterval(check);
-                    Swal.close();
-                    document.getElementById('form-container').style.display = 'block';
+                    clearInterval(check); Swal.close();
+                    document.getElementById('form-container').style.display='block';
                     document.getElementById('serv_display').value = servico;
-                    window.scrollTo(0, document.body.scrollHeight);
                 }
             }, 3000);
         }
 
         function enviarWhatsFinal() {
             const end = document.getElementById('end').value;
-            const serv = document.getElementById('serv_display').value;
-            if(!end) return alert("Por favor, digite seu endereço.");
-            const texto = `Olá! Fiz o pagamento da reserva para ${serv}. Meu endereço é: ${end}`;
-            window.open(`https://wa.me/5573988478170?text=${encodeURIComponent(texto)}`);
+            if(!end) return alert("Digite seu endereço!");
+            window.open(`https://wa.me/5573988478170?text=Pagamento%20feito!%20Endereço:%20${encodeURIComponent(end)}`);
         }
 
         window.onload = carregarTecnicos;
