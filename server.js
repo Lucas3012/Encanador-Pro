@@ -130,5 +130,24 @@ app.get('/api/aprovados', (req, res) => {
     const db = JSON.parse(fs.readFileSync(DB_PATH));
     res.json(db.colaboradores.filter(c => c.aprovado));
 });
+// --- SISTEMA DE SENHA DO ADMIN ---
+// Garante que a senha exista no db.json ao iniciar
+const dbInicial = JSON.parse(fs.readFileSync(DB_PATH));
+if (!dbInicial.config) {
+    dbInicial.config = { senha_admin: "1234" }; // Senha padrão inicial
+    fs.writeFileSync(DB_PATH, JSON.stringify(dbInicial, null, 2));
+}
+
+// Rota para o Admin validar a senha
+app.post('/api/admin/login', (req, res) => {
+    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    const { senha } = req.body;
+    
+    if (senha === db.config.senha_admin) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, message: "Senha incorreta" });
+    }
+});
 
 app.listen(3000, () => console.log("🚀 Servidor Rodando (Porta 3000)"));

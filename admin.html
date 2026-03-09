@@ -110,22 +110,37 @@
 
     <script>
         // Mantenha seu link do Cloudflare aqui para funcionar no Termux
-        const API = "https://cam-bizarre-unless-pgp.trycloudflare.com"; 
+        const API = "https://workflow-dancing-holdings-balloon.trycloudflare.com"; 
 
         function toggleNav() {
             const s = document.getElementById("mySidebar");
             s.style.width = s.style.width === "250px" ? "0" : "250px";
         }
 
-        function fazerLogin() {
-            if(document.getElementById('admin-pass').value === '1234') {
-                Swal.fire({ icon: 'success', title: 'Acesso Liberado', timer: 1000, showConfirmButton: false });
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('panel-content').style.display = 'block';
-            } else { 
-                Swal.fire('Erro', 'Senha incorreta', 'error'); 
-            }
+        async function fazerLogin() {
+    const senhaDigitada = document.getElementById('admin-pass').value;
+
+    Swal.fire({ title: 'Verificando...', didOpen: () => Swal.showLoading() });
+
+    try {
+        const res = await fetch(`${API}/api/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true' },
+            body: JSON.stringify({ senha: senhaDigitada })
+        });
+
+        if (res.ok) {
+            Swal.fire({ icon: 'success', title: 'Acesso Liberado', timer: 1000, showConfirmButton: false });
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('panel-content').style.display = 'block';
+        } else {
+            Swal.fire('Erro', 'Senha incorreta!', 'error');
         }
+    } catch (e) {
+        Swal.fire('Erro', 'O servidor Termux está offline.', 'error');
+    }
+}
+
 
         function mudarAba(id, btn) {
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));

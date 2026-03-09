@@ -22,5 +22,8 @@
       "exp": "Total",
       "aprovado": true
     }
-  ]
+  ],
+  "config": {
+    "senha_admin": "1234"
+  }
 }
