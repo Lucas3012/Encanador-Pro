@@ -197,3 +197,38 @@ button {
     height: 100%;
     object-fit: cover; /* Faz a imagem preencher o quadrado sem distorcer */
 }
+/* AJUSTES PARA O LOGO CENTRALIZADO */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Mantém o ícone do menu à esquerda */
+    padding: 10px 15px;
+    height: 70px;
+}
+
+.logo-centralizado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Espaço entre a gota e o nome */
+    flex-grow: 1; /* Faz o container ocupar o espaço central */
+    margin-right: 40px; /* Compensa a largura do ícone do menu para centralizar perfeito */
+}
+
+.logo-centralizado h1 {
+    font-size: 22px; /* Nome maior */
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--white);
+}
+
+.logo-centralizado span {
+    font-size: 24px; /* Tamanho da gota */
+}
+
+/* Ajuste no menu-icon para não quebrar o alinhamento */
+.menu-icon {
+    width: 30px;
+    z-index: 1001;
+}
