@@ -2,11 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 
-// --- CONFIGURAÇÃO DE SEGURANÇA (CORS PARA GITHUB) ---
+// --- CONFIGURAÇÃO DE SEGURANÇA E BYPASS CLOUDFLARE ---
 app.use(cors());
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -17,62 +16,114 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 
-// --- CONFIGURAÇÃO GEMINI AI ---
-const genAI = new GoogleGenerativeAI("AIzaSyA87E5vtKYlw2Ow765EIF8463FH_LjZdZc");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-// --- BANCO DE DADOS EM ARQUIVO ---
+// --- BANCO DE DADOS (db.json) ---
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
-const LEADS_PATH = path.join(DATA_DIR, 'contatos.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({ sessoes: [], colaboradores: [] }, null, 2));
-if (!fs.existsSync(LEADS_PATH)) fs.writeFileSync(LEADS_PATH, JSON.stringify([], null, 2));
+if (!fs.existsSync(DB_PATH)) {
+    fs.writeFileSync(DB_PATH, JSON.stringify({ 
+        sessoes: [],         // Para Histórico e Admin (PIX)
+        colaboradores: [],   // Para Index e Trabalhe Conosco
+        galeria: [],         // Para Galeria de Fotos
+        candidatos: []       // Para Receber currículos do Trabalhe Conosco
+    }, null, 2));
+}
 
-// --- ROTA DA INTELIGÊNCIA ARTIFICIAL ---
-app.post('/api/chat-gemini', async (req, res) => {
-    try {
-        const { mensagem } = req.body;
-        const prompt = `Você é o "Mestre Encanador", assistente da Encanador Pro em Itabuna-BA.
-        - Regras: Atendimento em Itabuna (Centro, Fátima, etc). Chegada em 30-60 min. Garantia de 90 dias.
-        - Estilo: Seja muito prestativo e educado. Se for vazamento, recomende fechar o registro geral.
-        - Objetivo: Sempre tente pegar o WhatsApp do cliente para o técnico ligar.
-        Pergunta do cliente: ${mensagem}`;
+// --- HELPER: LER/ESCREVER DB ---
+const readDB = () => JSON.parse(fs.readFileSync(DB_PATH));
+const writeDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        res.json({ resposta: response.text() });
-    } catch (error) {
-        console.error("Erro Gemini:", error);
-        res.status(500).json({ resposta: "Estou com muita demanda agora! Deixe seu WhatsApp que o mestre te chama." });
-    }
-});
-
-// --- ROTAS DE DADOS ---
+// ==========================================
+// 1. ROTAS PARA INDEX.HTML (Técnicos e Início)
+// ==========================================
 app.get('/api/aprovados', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
-    res.json(db.colaboradores.filter(c => c.aprovado));
-});
-
-app.post('/api/contato-chatbot', (req, res) => {
-    const leads = JSON.parse(fs.readFileSync(LEADS_PATH));
-    leads.push({ telefone: req.body.telefone, data: new Date().toLocaleString('pt-BR') });
-    fs.writeFileSync(LEADS_PATH, JSON.stringify(leads, null, 2));
-    res.json({ success: true });
+    const db = readDB();
+    res.json(db.colaboradores.filter(c => c.aprovado) || []);
 });
 
 app.post('/api/registrar-id', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
-    db.sessoes.push({ id_visto: req.body.id_visto, servico: req.body.servico, status: "pendente" });
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    const db = readDB();
+    const novaSessao = {
+        id_visto: req.body.id_visto,
+        servico: req.body.servico || "Geral",
+        status: "pendente",
+        data: new Date()
+    };
+    db.sessoes.push(novaSessao);
+    writeDB(db);
     res.json({ success: true });
 });
 
 app.get('/api/status/:id', (req, res) => {
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
+    const db = readDB();
     const s = db.sessoes.find(x => x.id_visto == req.params.id);
     res.json({ status: s ? s.status : 'pendente' });
 });
 
-app.listen(3000, () => console.log("🚀 Servidor Mestre Online na Porta 3000"));
+// ==========================================
+// 2. ROTAS PARA HISTORICO.HTML
+// ==========================================
+app.get('/api/sessoes-full', (req, res) => {
+    const db = readDB();
+    res.json(db.sessoes || []);
+});
+
+// ==========================================
+// 3. ROTAS PARA ADMIN.HTML (Gerenciamento)
+// ==========================================
+app.get('/api/admin/painel', (req, res) => {
+    const db = readDB();
+    res.json({
+        sessoes: db.sessoes,
+        candidatos: db.candidatos,
+        colaboradores: db.colaboradores
+    });
+});
+
+app.post('/api/liberar-pix', (req, res) => {
+    const db = readDB();
+    const { id_visto } = req.body;
+    const s = db.sessoes.find(x => x.id_visto == id_visto);
+    if(s) { s.status = "liberado"; writeDB(db); res.json({success: true}); }
+    else { res.status(404).json({success: false}); }
+});
+
+// ==========================================
+// 4. ROTAS PARA GALERIA.HTML
+// ==========================================
+app.get('/api/galeria', (req, res) => {
+    const db = readDB();
+    res.json(db.galeria || []);
+});
+
+app.post('/api/galeria/postar', (req, res) => {
+    const db = readDB();
+    db.galeria.push({ url: req.body.url, legenda: req.body.legenda, data: new Date() });
+    writeDB(db);
+    res.json({ success: true });
+});
+
+// ==========================================
+// 5. ROTAS PARA TRABALHE-CONOSCO.HTML
+// ==========================================
+app.post('/api/trabalhe/enviar', (req, res) => {
+    const db = readDB();
+    const novoCandidato = {
+        nome: req.body.nome,
+        telefone: req.body.telefone,
+        especialidade: req.body.especialidade,
+        data: new Date(),
+        status: "em_analise"
+    };
+    db.candidatos.push(novoCandidato);
+    writeDB(db);
+    res.json({ success: true, message: "Currículo enviado com sucesso!" });
+});
+
+// --- INICIALIZAÇÃO ---
+app.listen(3000, () => {
+    console.log("-----------------------------------------");
+    console.log("🚀 ECOSSISTEMA ENCANADOR PRO - FULL ONLINE");
+    console.log("-----------------------------------------");
+});
