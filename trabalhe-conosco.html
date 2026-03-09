@@ -3,188 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seja um Parceiro - Encanador Pro</title>
+    <title>Trabalhe Conosco - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        /* Estilos Exclusivos para a Página de Cadastro */
-        .header-cadastro {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .header-cadastro h2 {
-            color: var(--primary);
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .header-cadastro p {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #444;
-        }
-
-        .form-group i {
-            position: absolute;
-            left: 12px;
-            top: 35px;
-            color: var(--primary);
-        }
-
-        .input-icon {
-            padding-left: 15px !important;
-            border: 2px solid #eee !important;
-            transition: 0.3s;
-        }
-
-        .input-icon:focus {
-            border-color: var(--primary) !important;
-            background-color: #f0f7ff;
-        }
-
-        .badge-info {
-            background: #e7f3ff;
-            color: #007bff;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #007bff;
-        }
-
-        .btn-enviar-colab {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            font-size: 16px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-            border: none;
-            transition: 0.3s;
-        }
-
-        .btn-enviar-colab:active {
-            transform: scale(0.98);
-        }
-    </style>
 </head>
 <body>
 
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <h1 class="logo-centralizado">
-            <span class="drop-icon">💧</span>ENCANADOR PRO
-        </h1>
-        <div style="width: 24px;"></div> 
+    <div class="status-bar">
+        <span>📍 Oportunidade em Itabuna-BA</span>
+        <span id="sys-status">🟢 Sistema Ativo</span>
     </div>
 
     <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <a href="index.html">🏠 Início</a>
-        <a href="historico.html">📋 Histórico</a>
-        <a href="galeria.html">📸 Galeria</a>
-        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
+        <a href="historico.html">📜 Histórico</a>
+        <a href="galeria.html">🖼️ Galeria</a>
+        <a href="trabalhe.html">💼 Trabalhe Conosco</a>
+        <hr style="border-top: 1px solid #444; margin: 10px 0;">
         <a href="admin.html">🔐 Painel Admin</a>
     </div>
 
+    <div class="header">
+        <span class="openbtn" onclick="openNav()">&#9776;</span>
+        <h1 class="logo-centralizado">TRABALHE CONOSCO</h1>
+    </div>
+
     <div class="container">
-        <div class="header-cadastro">
-            <h2>Venha para o Time! 👷‍♂️</h2>
-            <p>Aumente seus serviços em Itabuna sendo um técnico parceiro.</p>
+        <div class="card-form">
+            <h2 style="text-align: center; color: #007bff;">Seja um Parceiro</h2>
+            <p style="text-align: center; font-size: 13px; color: #666; margin-bottom: 20px;">
+                É encanador profissional em Itabuna? Junte-se à nossa equipa de elite.
+            </p>
+
+            <form id="form-candidato">
+                <div class="campo">
+                    <label>Nome Completo:</label>
+                    <input type="text" id="nome" placeholder="Ex: João Silva" required>
+                </div>
+
+                <div class="campo">
+                    <label>WhatsApp (com DDD):</label>
+                    <input type="tel" id="telefone" placeholder="73 99999-9999" required>
+                </div>
+
+                <div class="campo">
+                    <label>Especialidade Principal:</label>
+                    <select id="especialidade">
+                        <option value="Encanador Geral">Encanador Geral</option>
+                        <option value="Caça Vazamentos">Caça Vazamentos</option>
+                        <option value="Desentupidor">Desentupidor</option>
+                        <option value="Instalações Hidráulicas">Instalações Hidráulicas</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-enviar">ENVIAR CANDIDATURA</button>
+            </form>
         </div>
-
-        <div class="badge-info">
-            🔔 <b>Como funciona:</b> Após enviar seu cadastro, nossa equipe analisará seu perfil. Uma vez aprovado, você aparecerá no mapa e na lista de técnicos da página inicial!
-        </div>
-
-        <form id="formColaborador">
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" id="nome_colab" class="input-icon" placeholder="Ex: João Silva" required>
-            </div>
-
-            <div class="form-group">
-                <label>Sua Especialidade</label>
-                <select id="funcao_colab" class="input-icon" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #eee;">
-                    <option value="Encanador Geral">Encanador Geral</option>
-                    <option value="Especialista em Vazamentos">Especialista em Vazamentos</option>
-                    <option value="Desentupidor">Desentupidor</option>
-                    <option value="Instalação de Bombas">Instalação de Bombas</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>WhatsApp (com DDD)</label>
-                <input type="number" id="tel_colab" class="input-icon" placeholder="73999999999" required>
-            </div>
-
-            <div class="form-group">
-                <label>Bairro de Atuação Principal</label>
-                <input type="text" id="bairro_colab" class="input-icon" placeholder="Ex: Centro, Conceição..." required>
-            </div>
-
-            <button type="submit" class="btn-enviar-colab">SOLICITAR APROVAÇÃO ✅</button>
-        </form>
     </div>
 
     <script>
-        const API = "http://localhost:3000";
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
+        // --- ATUALIZE COM O SEU LINK DO CLOUDFLARE ---
+        const API_BASE = "https://bennett-data-warranties-calculate.trycloudflare.com";
 
-        document.getElementById('formColaborador').onsubmit = async (e) => {
+        document.getElementById('form-candidato').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const novoColab = {
-                nome: document.getElementById('nome_colab').value,
-                funcao: document.getElementById('funcao_colab').value,
-                telefone: document.getElementById('tel_colab').value,
-                bairro: document.getElementById('bairro_colab').value
+            const dados = {
+                nome: document.getElementById('nome').value,
+                telefone: document.getElementById('telefone').value,
+                especialidade: document.getElementById('especialidade').value
             };
 
-            Swal.fire({
-                title: 'Enviando Cadastro...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+            Swal.fire({ title: 'Enviando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                const res = await fetch(`${API}/api/colaborador`, {
+                const res = await fetch(`${API_BASE}/api/trabalhe/enviar`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(novoColab)
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'bypass-tunnel-reminder': 'true'
+                    },
+                    body: JSON.stringify(dados)
                 });
 
                 if (res.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Cadastro Recebido!',
-                        text: 'Aguarde nossa análise. Entraremos em contato via WhatsApp.',
-                        confirmButtonColor: '#007bff'
-                    }).then(() => {
-                        window.location.href = "index.html";
-                    });
+                    Swal.fire('Sucesso!', 'Os seus dados foram enviados. Lucas Emanuel entrará em contacto em breve.', 'success');
+                    document.getElementById('form-candidato').reset();
+                } else {
+                    throw new Error();
                 }
-            } catch (err) {
-                Swal.fire('Erro', 'Servidor offline. Tente novamente mais tarde.', 'error');
+            } catch (error) {
+                Swal.fire('Erro', 'Não foi possível enviar agora. Verifique se o servidor está online.', 'error');
             }
-        };
+        });
     </script>
+
+    <style>
+        .card-form {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+
+        .campo { margin-bottom: 15px; }
+        .campo label { display: block; font-size: 14px; font-weight: bold; color: #444; margin-bottom: 5px; }
+        
+        .campo input, .campo select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .btn-enviar {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-enviar:hover { background: #0056b3; }
+
+        /* Reutilização da Sidebar do index */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
+        .sidebar a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
+        .sidebar .closebtn { position: absolute; top: 0; right: 25px; font-size: 36px; }
+        .openbtn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: white; }
+    </style>
 </body>
 </html>

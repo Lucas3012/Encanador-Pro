@@ -6,177 +6,145 @@
     <title>Galeria de Serviços - Encanador Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <div class="status-bar">
+        <span>📍 Nossos Trabalhos em Itabuna</span>
+        <span id="sys-status">🟢 Galeria Ativa</span>
+    </div>
+
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="index.html">🏠 Início</a>
+        <a href="historico.html">📜 Histórico</a>
+        <a href="galeria.html">🖼️ Galeria</a>
+        <a href="trabalhe.html">💼 Trabalhe Conosco</a>
+        <hr style="border-top: 1px solid #444; margin: 10px 0;">
+        <a href="admin.html">🔐 Painel Admin</a>
+    </div>
+
+    <div class="header">
+        <span class="openbtn" onclick="openNav()">&#9776;</span>
+        <h1 class="logo-centralizado">NOSSA GALERIA</h1>
+    </div>
+
+    <div class="container">
+        <div class="secao-titulo">Trabalhos Realizados:</div>
+        
+        <div id="grid-galeria" class="galeria-container">
+            <p class="loading-text">Carregando fotos do mestre...</p>
+        </div>
+    </div>
+
+    <a href="https://wa.me/5573988478170?text=Olá!%20Vi%20as%20fotos%20na%20galeria%20e%20gostaria%20de%20um%20orçamento." 
+       class="whatsapp-float" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+        <span>Pedir Orçamento</span>
+    </a>
+
+    <script>
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+
+        // --- ATUALIZE COM O SEU LINK DO CLOUDFLARE ---
+        const API_BASE = "https://bennett-data-warranties-calculate.trycloudflare.com";
+
+        async function carregarGaleria() {
+            try {
+                const res = await fetch(`${API_BASE}/api/galeria`, {
+                    headers: { 'bypass-tunnel-reminder': 'true' }
+                });
+                const fotos = await res.json();
+                
+                const grid = document.getElementById('grid-galeria');
+                
+                if (fotos.length === 0) {
+                    grid.innerHTML = `
+                        <div class="card-vazio">
+                            <p>Ainda não há fotos públicas.</p>
+                            <small>Lucas Emanuel está preparando o portfólio.</small>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = fotos.map(f => `
+                    <div class="foto-item" onclick="verFoto('${f.url}', '${f.legenda}')">
+                        <img src="${f.url}" alt="${f.legenda}">
+                        <div class="legenda-overlay">${f.legenda}</div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                document.getElementById('grid-galeria').innerHTML = "<p style='text-align:center; color:red;'>Erro ao carregar galeria. Servidor offline.</p>";
+            }
+        }
+
+        function verFoto(url, legenda) {
+            Swal.fire({
+                imageUrl: url,
+                imageAlt: legenda,
+                title: legenda,
+                confirmButtonText: 'Fechar',
+                confirmButtonColor: '#007bff'
+            });
+        }
+
+        window.onload = carregarGaleria;
+    </script>
+
     <style>
-        /* Estilos específicos para a Grade da Galeria */
-        .galeria-grid {
+        .galeria-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(2, 1fr); /* 2 colunas no celular */
+            gap: 10px;
+            margin-bottom: 80px;
         }
 
         .foto-item {
-            aspect-ratio: 1 / 1;
+            position: relative;
+            background: #ddd;
+            border-radius: 10px;
             overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            border: 3px solid white;
+            height: 150px;
             cursor: pointer;
-            transition: transform 0.3s ease;
-            background: #eee;
-        }
-
-        .foto-item:hover {
-            transform: scale(1.03);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .foto-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: 0.3s;
         }
 
-        /* Botão de Enviar Foto */
-        .btn-upload {
-            background: #007bff;
+        .foto-item:hover img { transform: scale(1.1); }
+
+        .legenda-overlay {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
             color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 50px;
             width: 100%;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,123,255,0.3);
-        }
-
-        /* Título da seção */
-        .secao-titulo-galeria {
+            font-size: 10px;
+            padding: 5px;
             text-align: center;
-            margin-bottom: 20px;
-            color: #333;
         }
+
+        .card-vazio {
+            grid-column: span 2;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            color: #888;
+        }
+
+        /* Estilo da Sidebar Reutilizado */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
+        .sidebar a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
+        .sidebar .closebtn { position: absolute; top: 0; right: 25px; font-size: 36px; }
+        .openbtn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: white; }
     </style>
-</head>
-<body>
-
-    <div class="header">
-        <span class="menu-icon" onclick="toggleNav()">&#9776;</span>
-        <b>Galeria de Serviços</b>
-    </div>
-
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" onclick="toggleNav()" class="close-btn">×</a>
-        <a href="index.html">🏠 Início</a>
-        <a href="historico.html">📋 Histórico</a>
-        <a href="galeria.html">📸 Galeria</a>
-        <a href="trabalhe-conosco.html">👷 Trabalhe Conosco</a>
-        <a href="admin.html">🔐 Painel Admin</a>
-    </div>
-
-    <div class="container">
-        <div class="secao-titulo-galeria">
-            <h2>Nossos Trabalhos 🛠️</h2>
-            <p style="font-size: 13px; color: #666;">Veja alguns dos serviços realizados em Itabuna</p>
-        </div>
-
-        <button class="btn-upload" onclick="triggerUpload()">
-            <span>📷 Enviar Minha Foto</span>
-        </button>
-        <input type="file" id="input-foto" hidden accept="image/*" onchange="enviarFoto(this)">
-
-        <div id="grid-fotos" class="galeria-grid">
-            <p style="text-align:center; grid-column: 1/-1; padding: 20px;">Carregando galeria...</p>
-        </div>
-    </div>
-
-    <script>
-        const API = "http://localhost:3000";
-
-        function toggleNav() {
-            const s = document.getElementById("mySidebar");
-            s.style.width = s.style.width === "250px" ? "0" : "250px";
-        }
-
-        // Função para abrir o seletor de arquivos
-        function triggerUpload() {
-            document.getElementById('input-foto').click();
-        }
-
-        // Função para carregar as fotos aprovadas do servidor
-        async function carregarGaleria() {
-            try {
-                const res = await fetch(`${API}/api/galeria`);
-                const fotos = await res.json();
-                const container = document.getElementById('grid-fotos');
-
-                if (fotos.length === 0) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align:center; padding: 40px; color: #999;">
-                            <p>Nenhuma foto aprovada no momento.</p>
-                        </div>`;
-                    return;
-                }
-
-                container.innerHTML = fotos.map(foto => `
-                    <div class="foto-item" onclick="expandirFoto('${API}/fotos/${foto}')">
-                        <img src="${API}/fotos/${foto}" alt="Serviço Encanador Pro">
-                    </div>
-                `).join('');
-
-            } catch (e) {
-                console.error("Erro ao carregar fotos:", e);
-                document.getElementById('grid-fotos').innerHTML = "<p style='text-align:center; grid-column:1/-1;'>Erro ao conectar com o servidor.</p>";
-            }
-        }
-
-        // Função para enviar foto para aprovação
-        async function enviarFoto(input) {
-            if (!input.files[0]) return;
-
-            const formData = new FormData();
-            formData.append('foto', input.files[0]);
-
-            Swal.fire({ title: 'Enviando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            try {
-                const res = await fetch(`${API}/api/upload-galeria`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (res.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Foto Enviada!',
-                        text: 'Sua foto foi enviada para análise e em breve aparecerá na galeria.',
-                        confirmButtonColor: '#007bff'
-                    });
-                }
-            } catch (e) {
-                Swal.fire('Erro', 'Não foi possível enviar a foto.', 'error');
-            }
-            input.value = ""; // Limpa o input
-        }
-
-        // Função para ver a foto maior (Lightbox)
-        function expandirFoto(url) {
-            Swal.fire({
-                imageUrl: url,
-                imageAlt: 'Serviço Realizado',
-                showCloseButton: true,
-                showConfirmButton: false,
-                background: 'rgba(0,0,0,0.9)',
-                backdrop: `rgba(0,0,123,0.4)`
-            });
-        }
-
-        // Iniciar
-        window.onload = carregarGaleria;
-    </script>
 </body>
 </html>
